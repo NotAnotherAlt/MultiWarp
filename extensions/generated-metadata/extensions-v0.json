@@ -1439,6 +1439,174 @@
           "link": "https://scratch.mit.edu/users/LilyMakesThings/"
         }
       ]
+    },
+    {
+      "id": "p7videosharing",
+      "slug": "VideoSharing",
+      "name": "Video Sharing",
+      "description": "Share the camera or screen and capture still images from the browser.",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "Snail IDE"
+        }
+      ]
+    },
+    {
+      "id": "randomutils",
+      "slug": "random_utils",
+      "name": "Random Utils",
+      "description": "Miscellaneous random and utility blocks for projects.",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "Snail IDE"
+        }
+      ]
+    },
+    {
+      "id": "grayscaleextension",
+      "slug": "grayscale",
+      "name": "Grayscale",
+      "description": "Apply grayscale filters and related visual adjustments.",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "Snail IDE"
+        }
+      ]
+    },
+    {
+      "id": "browserinfo",
+      "slug": "browserandosinfo",
+      "name": "Browser & OS Info",
+      "description": "Query browser, OS, and device details from the project runtime.",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "Snail IDE"
+        }
+      ]
+    },
+    {
+      "id": "urlinfo",
+      "slug": "urlinfo",
+      "name": "URL Info",
+      "description": "Read URL, path, and query information from the page or project context.",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "Snail IDE"
+        }
+      ]
+    },
+    {
+      "id": "snailsavedata",
+      "slug": "save",
+      "name": "Snail Save Data",
+      "description": "Persist project data locally in the browser using Snail save blocks.",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "Snail IDE"
+        }
+      ]
+    },
+    {
+      "id": "serverData",
+      "slug": "cloudstorage",
+      "name": "Server Data",
+      "description": "Read and write text data through a server-backed storage endpoint.",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "Snail IDE"
+        }
+      ]
+    },
+    {
+      "id": "TU",
+      "slug": "Time_Utilities",
+      "name": "Time Utilities",
+      "description": "Helpers for formatting dates, timers, and time-based values.",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "Snail IDE"
+        }
+      ]
+    },
+    {
+      "id": "ISSLocation",
+      "slug": "iss",
+      "name": "ISS Location",
+      "description": "Track the current location of the International Space Station.",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "Snail IDE"
+        }
+      ]
+    },
+    {
+      "id": "P7SuperStorage",
+      "slug": "SuperStorage",
+      "name": "Super Storage",
+      "description": "Store larger amounts of project data with a browser-backed system.",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "Snail IDE"
+        }
+      ]
+    },
+    {
+      "id": "randomlyblockscool",
+      "slug": "randomlyBlocks",
+      "name": "Randomly Blocks",
+      "description": "Add randomization helpers and playful block utilities.",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "Snail IDE"
+        }
+      ]
+    },
+    {
+      "id": "GPTprompts",
+      "slug": "Prompts",
+      "name": "GPT Prompts",
+      "description": "Generate or work with prompt-based interactions for AI-style workflows.",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "Snail IDE"
+        }
+      ]
+    },
+    {
+      "id": "snailapi",
+      "slug": "api",
+      "name": "Snail API",
+      "description": "Access Snail IDE-related API endpoints and project metadata.",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "Snail IDE"
+        }
+      ]
+    },
+    {
+      "id": "LZcollisionsSP",
+      "slug": "Lazy-Collisions",
+      "name": "Lazy Collisions",
+      "description": "Simple collision helpers for sprite interaction.",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "Snail IDE"
+        }
+      ]
     }
   ]
 }
