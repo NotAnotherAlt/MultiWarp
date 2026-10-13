@@ -7,6 +7,13 @@ import {LoadingState} from '../../../src/reducers/project-state';
 import VM from 'scratch-vm';
 
 import SBFileUploaderHOC from '../../../src/lib/sb-file-uploader-hoc.jsx';
+import rewriteBundledExtensionURLs from '../../../src/lib/tw-project-extension-rewriter';
+
+jest.mock('../../../src/lib/tw-project-extension-rewriter', () => jest.fn(projectData => (
+    Promise.resolve({
+        rewritten: projectData
+    })
+)));
 
 describe('SBFileUploaderHOC', () => {
     const mockStore = configureStore();
@@ -79,6 +86,31 @@ describe('SBFileUploaderHOC', () => {
     test('sets blank title with filename with no extension', () => {
         const projectName = unwrappedInstance().getProjectTitleFromFilename('my project is great');
         expect(projectName).toBe('');
+    });
+
+    test('rewrites bundled extension URLs before loading an uploaded project', async () => {
+        const instance = unwrappedInstance();
+        const fileContents = new ArrayBuffer(8);
+        vm.loadProject = jest.fn(() => Promise.resolve());
+        Object.defineProperty(vm, 'renderer', {
+            value: {
+                draw: jest.fn()
+            }
+        });
+        instance.fileReader = {
+            result: fileContents
+        };
+        instance.fileToUpload = {
+            name: 'project.sb3'
+        };
+
+        instance.onload();
+        await new Promise(resolve => process.nextTick(resolve));
+
+        expect(rewriteBundledExtensionURLs).toHaveBeenCalledWith(fileContents);
+        expect(vm.loadProject).toHaveBeenCalledWith({
+            rewritten: fileContents
+        });
     });
 
     /* tw: test is broken by flag required to fix issues with multiple instances

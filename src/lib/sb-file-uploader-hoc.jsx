@@ -24,6 +24,7 @@ import {
 import {
     closeFileMenu
 } from '../reducers/menus';
+import rewriteBundledExtensionURLs from './tw-project-extension-rewriter';
 
 /**
  * Higher Order Component to provide behavior for loading local project files into editor.
@@ -199,7 +200,8 @@ const SBFileUploaderHOC = function (WrappedComponent) {
                 let loadingSuccess = false;
                 // tw: stop when loading new project
                 this.props.vm.quit();
-                this.props.vm.loadProject(this.fileReader.result)
+                rewriteBundledExtensionURLs(this.fileReader.result)
+                    .then(projectData => this.props.vm.loadProject(projectData))
                     .then(() => {
                         if (filename) {
                             const uploadedProjectTitle = this.getProjectTitleFromFilename(filename);
