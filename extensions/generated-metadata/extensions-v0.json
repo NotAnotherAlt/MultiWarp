@@ -1445,6 +1445,7 @@
       "slug": "VideoSharing",
       "name": "Video Sharing",
       "description": "Share the camera or screen and capture still images from the browser.",
+      "image": "images/snail/video-sharing.svg",
       "scratchCompatible": false,
       "by": [
         {
@@ -1457,6 +1458,7 @@
       "slug": "random_utils",
       "name": "Random Utils",
       "description": "Miscellaneous random and utility blocks for projects.",
+      "image": "images/snail/random-utils.svg",
       "scratchCompatible": false,
       "by": [
         {
@@ -1469,6 +1471,7 @@
       "slug": "grayscale",
       "name": "Grayscale",
       "description": "Apply grayscale filters and related visual adjustments.",
+      "image": "images/snail/grayscale.svg",
       "scratchCompatible": false,
       "by": [
         {
@@ -1481,6 +1484,7 @@
       "slug": "browserandosinfo",
       "name": "Browser & OS Info",
       "description": "Query browser, OS, and device details from the project runtime.",
+      "image": "images/snail/browser-info.svg",
       "scratchCompatible": false,
       "by": [
         {
@@ -1493,6 +1497,7 @@
       "slug": "urlinfo",
       "name": "URL Info",
       "description": "Read URL, path, and query information from the page or project context.",
+      "image": "images/snail/url-info.svg",
       "scratchCompatible": false,
       "by": [
         {
@@ -1505,6 +1510,7 @@
       "slug": "save",
       "name": "Snail Save Data",
       "description": "Persist project data locally in the browser using Snail save blocks.",
+      "image": "images/snail/save-data.svg",
       "scratchCompatible": false,
       "by": [
         {
@@ -1517,6 +1523,7 @@
       "slug": "cloudstorage",
       "name": "Server Data",
       "description": "Read and write text data through a server-backed storage endpoint.",
+      "image": "images/snail/server-data.svg",
       "scratchCompatible": false,
       "by": [
         {
@@ -1529,6 +1536,7 @@
       "slug": "Time_Utilities",
       "name": "Time Utilities",
       "description": "Helpers for formatting dates, timers, and time-based values.",
+      "image": "images/snail/time-utilities.svg",
       "scratchCompatible": false,
       "by": [
         {
@@ -1541,6 +1549,7 @@
       "slug": "iss",
       "name": "ISS Location",
       "description": "Track the current location of the International Space Station.",
+      "image": "images/snail/iss-location.svg",
       "scratchCompatible": false,
       "by": [
         {
@@ -1553,6 +1562,7 @@
       "slug": "SuperStorage",
       "name": "Super Storage",
       "description": "Store larger amounts of project data with a browser-backed system.",
+      "image": "images/snail/super-storage.svg",
       "scratchCompatible": false,
       "by": [
         {
@@ -1565,6 +1575,7 @@
       "slug": "randomlyBlocks",
       "name": "Randomly Blocks",
       "description": "Add randomization helpers and playful block utilities.",
+      "image": "images/snail/randomly-blocks.svg",
       "scratchCompatible": false,
       "by": [
         {
@@ -1577,6 +1588,7 @@
       "slug": "Prompts",
       "name": "GPT Prompts",
       "description": "Generate or work with prompt-based interactions for AI-style workflows.",
+      "image": "images/snail/gpt-prompts.svg",
       "scratchCompatible": false,
       "by": [
         {
@@ -1589,6 +1601,7 @@
       "slug": "api",
       "name": "Snail API",
       "description": "Access Snail IDE-related API endpoints and project metadata.",
+      "image": "images/snail/snail-api.svg",
       "scratchCompatible": false,
       "by": [
         {
@@ -1601,6 +1614,7 @@
       "slug": "Lazy-Collisions",
       "name": "Lazy Collisions",
       "description": "Simple collision helpers for sprite interaction.",
+      "image": "images/snail/lazy-collisions.svg",
       "scratchCompatible": false,
       "by": [
         {
