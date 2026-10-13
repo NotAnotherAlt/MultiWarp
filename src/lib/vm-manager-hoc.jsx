@@ -14,6 +14,7 @@ import {
     projectError
 } from '../reducers/project-state';
 import log from './log';
+import rewriteBundledExtensionURLs from './tw-project-extension-rewriter';
 
 /**
  * List of fonts that could be used by security prompts.
@@ -71,7 +72,8 @@ const vmManagerHOC = function (WrappedComponent) {
         loadProject () {
             // tw: stop when loading new project
             this.props.vm.quit();
-            return this.props.vm.loadProject(this.props.projectData)
+            return rewriteBundledExtensionURLs(this.props.projectData)
+                .then(projectData => this.props.vm.loadProject(projectData))
                 .then(() => {
                     this.props.onLoadedProject(this.props.loadingState, this.props.canSave);
                     // Wrap in a setTimeout because skin loading in
