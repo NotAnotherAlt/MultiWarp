@@ -1607,6 +1607,22 @@
           "name": "Snail IDE"
         }
       ]
+    },
+    {
+      "id": "jg3d",
+      "slug": "jg3d-turbowarp",
+      "name": "3D",
+      "description": "Create and control simple 3D scenes, objects, and cameras.",
+      "image": "images/upstream/PenguinMod-jg_3d/cube.png",
+      "scratchCompatible": false
+    },
+    {
+      "id": "jg3dVr",
+      "slug": "jg3d-turbowarp",
+      "name": "3D VR",
+      "description": "Use WebXR VR sessions and controllers with the 3D extension.",
+      "image": "images/upstream/PenguinMod-jg_3d/camera.png",
+      "scratchCompatible": false
     }
   ]
 }

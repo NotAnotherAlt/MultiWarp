@@ -1,0 +1,5 @@
+The PNG images in this directory are from PenguinMod/PenguinMod-Vm,
+src/extensions/jg_3d, branch develop:
+https://github.com/PenguinMod/PenguinMod-Vm/tree/develop/src/extensions/jg_3d
+
+They are distributed under the Mozilla Public License 2.0. See LICENSE.
