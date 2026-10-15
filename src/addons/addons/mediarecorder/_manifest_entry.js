@@ -2,6 +2,7 @@
 const manifest = {
   "name": "Project video recorder",
   "description": "Adds a \"start recording\" button to the editor menu bar that allows you to record the project's stage.",
+  "dynamicDisable": true,
   "tags": [
     "recommended"
   ],

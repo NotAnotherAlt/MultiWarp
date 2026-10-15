@@ -23,7 +23,8 @@ const manifest = {
       "id": "default",
       "name": "Enable by default",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "dynamic": true
     },
     {
       "id": "previous",
@@ -31,7 +32,8 @@ const manifest = {
       "type": "integer",
       "default": 1,
       "min": 0,
-      "max": 100
+      "max": 100,
+      "dynamic": true
     },
     {
       "id": "next",
@@ -39,7 +41,8 @@ const manifest = {
       "type": "integer",
       "default": 0,
       "min": 0,
-      "max": 100
+      "max": 100,
+      "dynamic": true
     },
     {
       "id": "opacity",
@@ -47,7 +50,8 @@ const manifest = {
       "type": "integer",
       "min": 0,
       "max": 100,
-      "default": 25
+      "default": 25,
+      "dynamic": true
     },
     {
       "id": "opacityStep",
@@ -55,7 +59,8 @@ const manifest = {
       "type": "integer",
       "min": 0,
       "max": 100,
-      "default": 10
+      "default": 10,
+      "dynamic": true
     },
     {
       "id": "layering",
@@ -71,7 +76,8 @@ const manifest = {
           "id": "behind",
           "name": "Behind"
         }
-      ]
+      ],
+      "dynamic": true
     },
     {
       "id": "mode",
@@ -87,19 +93,22 @@ const manifest = {
           "id": "tint",
           "name": "Color tint"
         }
-      ]
+      ],
+      "dynamic": true
     },
     {
       "name": "Previous costume tint",
       "id": "beforeTint",
       "type": "color",
-      "default": "#FF0000"
+      "default": "#FF0000",
+      "dynamic": true
     },
     {
       "name": "Next costume tint",
       "id": "afterTint",
       "type": "color",
-      "default": "#0000FF"
+      "default": "#0000FF",
+      "dynamic": true
     }
   ],
   "tags": [

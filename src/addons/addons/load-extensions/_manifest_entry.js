@@ -14,25 +14,36 @@ const manifest = {
       "name": "Music",
       "id": "music",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "dynamic": true
     },
     {
       "name": "Pen",
       "id": "pen",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "dynamic": true
     },
     {
       "name": "Text to Speech",
       "id": "text2speech",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "dynamic": true
     },
     {
       "name": "Translate",
       "id": "translate",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "dynamic": true
+    }
+  ],
+  "info": [
+    {
+      "type": "notice",
+      "id": "loaded-extensions",
+      "text": "An extension loaded in the current editor cannot be unloaded. Turning an option off prevents it from being auto-loaded in future editor sessions."
     }
   ],
   "dynamicDisable": true,

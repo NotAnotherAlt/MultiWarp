@@ -8,6 +8,20 @@ npm run prepublish
 npm run build
 ```
 
+## Local Preview
+
+After installing dependencies, start the development server:
+
+```sh
+npm start
+```
+
+Open `http://localhost:8601/editor.html` to try the editor, or
+`http://localhost:8601/embed.html` to preview the embedded player. You can open a
+test project in the editor to check changes before deploying. Stop the server with
+Ctrl+C when you're done. In GitHub Codespaces or another remote environment, open
+port `8601` from the forwarded ports panel if localhost is not accessible directly.
+
 ## Local Extensions
 
 Put extension JavaScript files in the root `extensions/` directory. Add each one to

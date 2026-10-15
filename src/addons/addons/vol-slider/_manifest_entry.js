@@ -40,7 +40,8 @@ const manifest = {
       "type": "integer",
       "min": 0,
       "max": 100,
-      "default": 100
+      "default": 100,
+      "dynamic": true
     },
     {
       "name": "Always show slider",

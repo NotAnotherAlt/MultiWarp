@@ -151,6 +151,23 @@ a:active, a:focus {
     font-weight: bold;
     text-align: center;
 }
+.close-button {
+    height: 36px;
+    width: 36px;
+    margin-left: 10px;
+    padding: 0;
+    border: 1px solid $ui-black-transparent;
+    border-radius: 4px;
+    color: inherit;
+    background: $ui-secondary;
+    font: inherit;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+.close-button:hover {
+    background: $ui-tertiary;
+}
 
 .addons {
     overflow-y: auto;
@@ -574,6 +591,8 @@ a:active, a:focus {
     display: flex;
     align-items: center;
     text-align: center;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .dirty-button {

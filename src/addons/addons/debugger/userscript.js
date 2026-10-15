@@ -26,6 +26,7 @@ export default async function ({ addon, console, msg }) {
 
   let hasLoggedPauseError = false;
   const pause = (_, thread) => {
+    if (addon.self.disabled) return;
     if (addon.tab.redux.state.scratchGui.mode.isPlayerOnly) {
       if (!hasLoggedPauseError) {
         logMessage(msg("cannot-pause-player"), thread, "error");
@@ -45,6 +46,7 @@ export default async function ({ addon, console, msg }) {
     args: ["content"],
     displayName: msg("block-log"),
     callback: ({ content }, thread) => {
+      if (addon.self.disabled) return;
       logMessage(content, thread, "log");
     },
   });
@@ -52,6 +54,7 @@ export default async function ({ addon, console, msg }) {
     args: ["content"],
     displayName: msg("block-warn"),
     callback: ({ content }, thread) => {
+      if (addon.self.disabled) return;
       logMessage(content, thread, "warn");
     },
   });
@@ -59,6 +62,7 @@ export default async function ({ addon, console, msg }) {
     args: ["content"],
     displayName: msg("block-error"),
     callback: ({ content }, thread) => {
+      if (addon.self.disabled) return;
       logMessage(content, thread, "error");
     },
   });
@@ -122,7 +126,7 @@ export default async function ({ addon, console, msg }) {
 
   let isInterfaceVisible = false;
   const setInterfaceVisible = (_isVisible) => {
-    isInterfaceVisible = _isVisible;
+    isInterfaceVisible = !addon.self.disabled && _isVisible;
     interfaceContainer.style.display = isInterfaceVisible ? "flex" : "";
     if (isInterfaceVisible) {
       activeTab.show();
@@ -148,6 +152,17 @@ export default async function ({ addon, console, msg }) {
     document.removeEventListener("mouseup", handleStopDrag);
     document.removeEventListener("mousemove", handleDragInterface);
   };
+  addon.self.addEventListener("disabled", () => {
+    handleStopDrag();
+    setPaused(false);
+    setInterfaceVisible(false);
+    interfaceContainer.remove();
+    debuggerButtonOuter.remove();
+  });
+  addon.self.addEventListener("reenabled", () => {
+    document.body.append(interfaceContainer);
+    addon.tab.appendToSharedSpace({ space: "stageHeader", element: debuggerButtonOuter, order: 0 });
+  });
   const moveInterface = (x, y) => {
     lastX = x;
     lastY = y;
@@ -235,6 +250,7 @@ export default async function ({ addon, console, msg }) {
   const afterStepCallbacks = [];
   vm.runtime._step = function (...args) {
     const ret = originalStep.call(this, ...args);
+    if (addon.self.disabled) return ret;
     for (const cb of afterStepCallbacks) {
       cb();
     }
@@ -564,10 +580,10 @@ export default async function ({ addon, console, msg }) {
 
   const ogGreenFlag = vm.runtime.greenFlag;
   vm.runtime.greenFlag = function (...args) {
-    if (addon.settings.get("log_clear_greenflag")) {
+    if (!addon.self.disabled && addon.settings.get("log_clear_greenflag")) {
       logsTab.clearLogs();
     }
-    if (addon.settings.get("log_greenflag")) {
+    if (!addon.self.disabled && addon.settings.get("log_greenflag")) {
       logsTab.addLog(msg("log-msg-flag-clicked"), null, "internal");
     }
     return ogGreenFlag.call(this, ...args);
@@ -575,7 +591,7 @@ export default async function ({ addon, console, msg }) {
 
   const ogMakeClone = vm.runtime.targets[0].constructor.prototype.makeClone;
   vm.runtime.targets[0].constructor.prototype.makeClone = function (...args) {
-    if (addon.settings.get("log_failed_clone_creation") && !vm.runtime.clonesAvailable()) {
+    if (!addon.self.disabled && addon.settings.get("log_failed_clone_creation") && !vm.runtime.clonesAvailable()) {
       logsTab.addLog(
         msg("log-msg-clone-cap", { sprite: this.getName() }),
         vm.runtime.sequencer.activeThread,
@@ -583,7 +599,7 @@ export default async function ({ addon, console, msg }) {
       );
     }
     var clone = ogMakeClone.call(this, ...args);
-    if (addon.settings.get("log_clone_create") && clone) {
+    if (!addon.self.disabled && addon.settings.get("log_clone_create") && clone) {
       logsTab.addLog(
         msg("log-msg-clone-created", { sprite: this.getName() }),
         vm.runtime.sequencer.activeThread,
@@ -595,7 +611,7 @@ export default async function ({ addon, console, msg }) {
 
   const ogStartHats = vm.runtime.startHats;
   vm.runtime.startHats = function (hat, optMatchFields, ...args) {
-    if (addon.settings.get("log_broadcasts") && hat === "event_whenbroadcastreceived") {
+    if (!addon.self.disabled && addon.settings.get("log_broadcasts") && hat === "event_whenbroadcastreceived") {
       logsTab.addLog(
         msg("log-msg-broadcasted", { broadcast: optMatchFields.BROADCAST_OPTION }),
         vm.runtime.sequencer.activeThread,

@@ -140,6 +140,13 @@ export default async function ({ addon, msg, console }) {
       blockTypes = null;
       querier.clearWorkspaceIndex();
     }
+    addon.self.addEventListener("disabled", () => {
+      closePopup();
+      popupRoot.remove();
+    });
+    addon.self.addEventListener("reenabled", () => {
+      document.body.appendChild(popupRoot);
+    });
   }
 
   popupInput.addEventListener("input", updateInput);
@@ -446,6 +453,7 @@ export default async function ({ addon, msg, console }) {
   // Open on mouse wheel button
   const _doWorkspaceClick_ = Blockly.Gesture.prototype.doWorkspaceClick_;
   Blockly.Gesture.prototype.doWorkspaceClick_ = function () {
+    if (addon.self.disabled) return _doWorkspaceClick_.call(this);
     if (this.mostRecentEvent_.button === 1 || this.mostRecentEvent_.shiftKey) openPopup();
     mousePosition = { x: this.mostRecentEvent_.clientX, y: this.mostRecentEvent_.clientY };
     _doWorkspaceClick_.call(this);
@@ -454,6 +462,7 @@ export default async function ({ addon, msg, console }) {
   // The popup should delete blocks dragged ontop of it
   const _isDeleteArea = Blockly.WorkspaceSvg.prototype.isDeleteArea;
   Blockly.WorkspaceSvg.prototype.isDeleteArea = function (e) {
+    if (addon.self.disabled) return _isDeleteArea.call(this, e);
     if (popupPosition) {
       if (
         e.clientX > popupPosition.x &&

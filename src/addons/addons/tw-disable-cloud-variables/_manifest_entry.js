@@ -3,6 +3,7 @@ const manifest = {
   "noTranslations": true,
   "name": "Disable cloud variables",
   "description": "Disable cloud variables by default. You can still re-enable them using the Edit > Enable cloud variables menu.",
+  "dynamicDisable": true,
   "userscripts": [
     {
       "url": "userscript.js"

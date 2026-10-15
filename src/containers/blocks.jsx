@@ -133,6 +133,7 @@ class Blocks extends React.Component {
         };
         this.onTargetsUpdate = debounce(this.onTargetsUpdate, 100);
         this.toolboxUpdateQueue = [];
+        this.intersectionCheckFrame = null;
     }
     componentDidMount () {
         this.ScratchBlocks = VMScratchBlocks(this.props.vm, this.props.useCatBlocks);
@@ -165,6 +166,17 @@ class Blocks extends React.Component {
             Blocks.defaultOptions
         );
         this.workspace = this.ScratchBlocks.inject(this.blocks, workspaceConfig);
+        if (this.workspace.intersectionObserver) {
+            // Pan and zoom can queue more visibility scans than the display can show.
+            const queueIntersectionCheck = this.workspace.queueIntersectionCheck.bind(this.workspace);
+            this.workspace.queueIntersectionCheck = () => {
+                if (this.intersectionCheckFrame !== null) return;
+                this.intersectionCheckFrame = requestAnimationFrame(() => {
+                    this.intersectionCheckFrame = null;
+                    queueIntersectionCheck();
+                });
+            };
+        }
         AddonHooks.blocklyWorkspace = this.workspace;
 
         // Register buttons under new callback keys for creating variables,
@@ -287,6 +299,10 @@ class Blocks extends React.Component {
     componentWillUnmount () {
         this.detachVM();
         this.unmounted = true;
+        if (this.intersectionCheckFrame !== null) {
+            cancelAnimationFrame(this.intersectionCheckFrame);
+            this.intersectionCheckFrame = null;
+        }
         this.workspace.dispose();
         clearTimeout(this.toolboxUpdateTimeout);
 

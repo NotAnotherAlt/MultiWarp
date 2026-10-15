@@ -261,6 +261,15 @@ class SettingsStore extends EventTargetShim {
             // Dynamic enable is always supported.
             // Dynamic disable requires addon support.
             const supportsDynamic = enabled ? true : !!manifest.dynamicDisable;
+            const dynamicEnable = enabled && !oldValue;
+            const dynamicDisable = !enabled && oldValue && !!manifest.dynamicDisable;
+            this.dispatchEvent(new CustomEvent('addon-changed', {
+                detail: {
+                    addonId,
+                    dynamicEnable,
+                    dynamicDisable
+                }
+            }));
             this.dispatchEvent(new CustomEvent('setting-changed', {
                 detail: {
                     addonId,
@@ -315,6 +324,13 @@ class SettingsStore extends EventTargetShim {
         }
         this.saveToLocalStorage();
         if (value !== oldValue) {
+            this.dispatchEvent(new CustomEvent('addon-changed', {
+                detail: {
+                    addonId,
+                    dynamicEnable: false,
+                    dynamicDisable: false
+                }
+            }));
             this.dispatchEvent(new CustomEvent('setting-changed', {
                 detail: {
                     addonId,

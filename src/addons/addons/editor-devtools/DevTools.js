@@ -19,6 +19,12 @@ export default class DevTools {
     this.canShare = false;
 
     this.mouseXY = { x: 0, y: 0 };
+    this.addon.self.addEventListener("disabled", () => {
+      this.domHelpers.unbindAllEvents();
+    });
+    this.addon.self.addEventListener("reenabled", () => {
+      if (this.root) this.initInner(this.root);
+    });
   }
 
   async init() {
@@ -33,6 +39,7 @@ export default class DevTools {
         ],
         reduxCondition: (state) => !state.scratchGui.mode.isPlayerOnly,
       });
+      this.root = root;
       this.initInner(root);
     }
   }
@@ -41,6 +48,7 @@ export default class DevTools {
     const oldCleanUpFunc = blockly.WorkspaceSvg.prototype.cleanUp;
     const self = this;
     blockly.WorkspaceSvg.prototype.cleanUp = function () {
+      if (self.addon.self.disabled) return oldCleanUpFunc.call(this);
       if (self.addon.settings.get("enableCleanUpPlus")) {
         self.doCleanUp();
       } else {
@@ -49,20 +57,27 @@ export default class DevTools {
     };
 
     let originalMsg = blockly.Msg.CLEAN_UP;
-    if (this.addon.settings.get("enableCleanUpPlus")) blockly.Msg.CLEAN_UP = this.m("clean-plus");
-    this.addon.settings.addEventListener("change", () => {
-      if (this.addon.settings.get("enableCleanUpPlus")) blockly.Msg.CLEAN_UP = this.m("clean-plus");
+    const updateCleanupLabel = () => {
+      if (!this.addon.self.disabled && this.addon.settings.get("enableCleanUpPlus")) {
+        blockly.Msg.CLEAN_UP = this.m("clean-plus");
+      }
       else blockly.Msg.CLEAN_UP = originalMsg;
-    });
+    };
+    updateCleanupLabel();
+    this.addon.settings.addEventListener("change", updateCleanupLabel);
+    this.addon.self.addEventListener("disabled", updateCleanupLabel);
+    this.addon.self.addEventListener("reenabled", updateCleanupLabel);
 
     this.addon.tab.createBlockContextMenu(
       (items, block) => {
+        if (this.addon.self.disabled) return items;
         items.push({
           enabled: blockly.clipboardXml_,
           text: this.m("paste"),
           separator: true,
           _isDevtoolsFirstItem: true,
           callback: () => {
+            if (this.addon.self.disabled) return;
             let ids = this.getTopBlockIDs();
 
             document.dispatchEvent(
@@ -84,6 +99,7 @@ export default class DevTools {
     );
     this.addon.tab.createBlockContextMenu(
       (items, block) => {
+        if (this.addon.self.disabled) return items;
         items.push(
           {
             enabled: true,
@@ -140,6 +156,7 @@ export default class DevTools {
     );
     this.addon.tab.createBlockContextMenu(
       (items, block) => {
+        if (this.addon.self.disabled) return items;
         if (block.getCategory() === "data" || block.getCategory() === "data-lists") {
           this.selVarID = block.getVars()[0];
           items.push({
@@ -608,10 +625,12 @@ export default class DevTools {
   }
 
   eventMouseMove(e) {
+    if (this.addon.self.disabled) return;
     this.updateMousePosition(e);
   }
 
   eventKeyDown(e) {
+    if (this.addon.self.disabled) return;
     const switchCostume = (up) => {
       // todo: select previous costume
       let selected = this.costTabBody.querySelector("div[class*='sprite-selector-item_is-selected']");
@@ -704,14 +723,17 @@ export default class DevTools {
   }
 
   eventMouseDown(e) {
+    if (this.addon.self.disabled) return;
     this.updateMousePosition(e);
   }
 
   eventMouseUp(e) {
+    if (this.addon.self.disabled) return;
     this.updateMousePosition(e);
   }
 
   initInner(root) {
+    this.root = root;
     let guiTabs = root.childNodes;
 
     if (this.codeTab && guiTabs[0] !== this.codeTab) {

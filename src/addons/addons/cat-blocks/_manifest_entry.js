@@ -4,6 +4,7 @@ const manifest = {
   "noTranslations": true,
   "name": "Cat blocks",
   "description": "Brings back editor cat hat blocks that were first introduced for April Fools' Day 2020.",
+  "dynamicDisable": true,
   "credits": [
     {
       "name": "TheColaber",
@@ -30,7 +31,8 @@ const manifest = {
       "id": "watch",
       "name": "Watch mouse cursor",
       "default": false,
-      "type": "boolean"
+      "type": "boolean",
+      "dynamic": true
     }
   ],
   "tags": [

@@ -51,6 +51,7 @@ const ensureNotReserved = (name) => {
 
 let currentSpriteFolder = null;
 let currentAssetFolder = null;
+let foldersAddonEnabled = true;
 
 /**
  * Used for compatibility with other addons that trap the add costume or add sound functions.
@@ -62,12 +63,34 @@ let currentAssetFolder = null;
  * @param {{name: string}} asset a sound or costume asset
  */
 export const addDefaultAssetFolderIfMissing = (asset) => {
-  if (asset && currentAssetFolder !== null && typeof getFolderFromName(asset.name) !== "string") {
+  if (foldersAddonEnabled && asset && currentAssetFolder !== null && typeof getFolderFromName(asset.name) !== "string") {
     asset.name = setFolderOfName(asset.name, currentAssetFolder);
   }
 };
 
 export default async function ({ addon, console, msg }) {
+  let vm;
+  let folderColorStylesheet = null;
+  const disableFolders = () => {
+    foldersAddonEnabled = false;
+    currentSpriteFolder = null;
+    currentAssetFolder = null;
+    if (folderColorStylesheet) folderColorStylesheet.remove();
+    if (vm) {
+      vm.emitTargetsUpdate();
+      vm.emitWorkspaceUpdate();
+    }
+  };
+  const enableFolders = () => {
+    foldersAddonEnabled = true;
+    if (folderColorStylesheet) document.head.appendChild(folderColorStylesheet);
+    if (vm) {
+      vm.emitTargetsUpdate();
+      vm.emitWorkspaceUpdate();
+    }
+  };
+  addon.self.addEventListener("disabled", disableFolders);
+  addon.self.addEventListener("reenabled", enableFolders);
   // The basic premise of how this addon works is relative simple.
   // scratch-gui renders the sprite selectors and asset selectors in a hierarchy like this:
   // <SelectorHOC>
@@ -90,8 +113,6 @@ export default async function ({ addon, console, msg }) {
   const TYPE_ASSETS = 2;
 
   // We run too early, will be set later
-  let vm;
-
   let reactInternalKey;
 
   let currentSpriteItems;
@@ -132,6 +153,7 @@ export default async function ({ addon, console, msg }) {
    * @returns {ItemData|null}
    */
   const getItemData = (item) => {
+    if (addon.self.disabled) return null;
     if (item && item.name && typeof item.name === "object") {
       return item.name;
     }
@@ -155,7 +177,6 @@ export default async function ({ addon, console, msg }) {
 </svg>`;
   const soundIconHref = `data:image/svg+xml;base64,${btoa(imageIconSource)}`;
 
-  let folderColorStylesheet = null;
   const folderColors = Object.create(null);
   const getFolderColorClass = (folderName) => {
     const mulberry32 = (a) => {
@@ -412,6 +433,7 @@ export default async function ({ addon, console, msg }) {
     };
 
     const processItems = (openFolders, props) => {
+      if (addon.self.disabled) return {};
       const processItem = (item) => {
         const itemId = item.name;
 
@@ -652,6 +674,7 @@ export default async function ({ addon, console, msg }) {
 
     const originalSortableHOCRender = SortableHOC.prototype.render;
     SortableHOC.prototype.render = function () {
+      if (addon.self.disabled) return originalSortableHOCRender.call(this);
       const originalProps = this.props;
       this.props = {
         ...this.props,
@@ -710,6 +733,7 @@ export default async function ({ addon, console, msg }) {
 
   await addon.tab.scratchClassReady();
   addon.tab.createEditorContextMenu((ctxType, ctx) => {
+    if (addon.self.disabled) return;
     if (ctxType !== "sprite" && ctxType !== "costume" && ctxType !== "sound") return;
     const component = ctx.target[addon.tab.traps.getInternalKey(ctx.target)].return.return.return.stateNode;
     const data = getItemData(component.props);
@@ -981,7 +1005,7 @@ export default async function ({ addon, console, msg }) {
 
     const originalInstallTargets = vm.installTargets;
     vm.installTargets = function (...args) {
-      if (currentSpriteFolder !== null) {
+      if (!addon.self.disabled && currentSpriteFolder !== null) {
         const targets = args[0];
         const wholeProject = args[2];
         if (Array.isArray(targets) && !wholeProject) {
@@ -993,7 +1017,7 @@ export default async function ({ addon, console, msg }) {
         }
       }
       return originalInstallTargets.call(this, ...args).then((r) => {
-        fixTargetOrder();
+        if (!addon.self.disabled) fixTargetOrder();
         return r;
       });
     };
@@ -1001,13 +1025,14 @@ export default async function ({ addon, console, msg }) {
     const originalDuplicateSprite = vm.duplicateSprite;
     vm.duplicateSprite = function (...args) {
       return originalDuplicateSprite.call(this, ...args).then((r) => {
-        fixTargetOrder();
+        if (!addon.self.disabled) fixTargetOrder();
         return r;
       });
     };
 
     const originalAddCostume = RenderedTarget.prototype.addCostume;
     RenderedTarget.prototype.addCostume = function (...args) {
+      if (addon.self.disabled) return originalAddCostume.call(this, ...args);
       addDefaultAssetFolderIfMissing(args[0]);
       const r = originalAddCostume.call(this, ...args);
       fixCostumeOrder(this);
@@ -1016,6 +1041,7 @@ export default async function ({ addon, console, msg }) {
 
     const originalAddSound = RenderedTarget.prototype.addSound;
     RenderedTarget.prototype.addSound = function (...args) {
+      if (addon.self.disabled) return originalAddSound.call(this, ...args);
       addDefaultAssetFolderIfMissing(args[0]);
       const r = originalAddSound.call(this, ...args);
       fixSoundOrder(this);
@@ -1268,6 +1294,7 @@ export default async function ({ addon, console, msg }) {
 
     const originalHandleDrop = Backpack.prototype.handleDrop;
     Backpack.prototype.handleDrop = function (...args) {
+      if (addon.self.disabled) return originalHandleDrop.call(this, ...args);
       // When a folder is dropped into the backpack, upload all the items in the folder.
       const dragInfo = args[0];
       const folderItems = dragInfo && dragInfo.payload && dragInfo.payload.sa_folder_items;

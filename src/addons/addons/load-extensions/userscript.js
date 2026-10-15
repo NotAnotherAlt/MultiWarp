@@ -11,6 +11,7 @@ export default async function ({ addon, console }) {
       }
     }
   };
+  addon.settings.addEventListener("change", loadExtensions);
   if (vm.editingTarget) {
     loadExtensions();
   } else {

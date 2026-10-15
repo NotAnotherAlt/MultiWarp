@@ -7,6 +7,12 @@ import tinycolor from "../../libraries/thirdparty/cs/tinycolor-min.js";
 
 export default async ({ addon, console, msg }) => {
   let prevEventHandler;
+  let activePicker;
+  let activeLabel;
+  let activeSliders;
+  let activeColorSlider;
+  let activePointerMove;
+  let activePointerUp;
   // 250-ms rate limit
   const rateLimiter = new RateLimiter(250);
 
@@ -32,6 +38,7 @@ export default async ({ addon, console, msg }) => {
 
   // load the new color to scratch
   const setColor = (hex, element) => {
+    if (addon.self.disabled) return;
     hex = normalizeHex(hex);
     if (!addon.tab.redux.state || !addon.tab.redux.state.scratchPaint) return;
     // The only way to reliably set color is to invoke eye dropper via click()
@@ -51,6 +58,24 @@ export default async ({ addon, console, msg }) => {
     addon.tab.redux.addEventListener("statechanged", onEyeDropperOpened);
     element.children[1].children[0].click();
   };
+
+  const hidePicker = () => {
+    if (activePointerMove) window.removeEventListener("pointermove", activePointerMove);
+    if (activePointerUp) window.removeEventListener("pointerup", activePointerUp);
+    if (activePicker) activePicker.remove();
+    if (activeLabel) activeLabel.remove();
+    if (activeSliders) {
+      for (const slider of activeSliders) slider.style.display = "";
+    }
+  };
+  const showPicker = () => {
+    if (!activePicker || !activeColorSlider || !activeColorSlider.isConnected) return;
+    for (const slider of activeSliders) slider.style.display = "none";
+    activeColorSlider.insertAdjacentElement("afterend", activePicker);
+    activeColorSlider.insertAdjacentElement("afterend", activeLabel);
+  };
+  addon.self.addEventListener("disabled", hidePicker);
+  addon.self.addEventListener("reenabled", showPicker);
 
   // for the color picker's background color
   const convertToGeneralColor = (hex) => {
@@ -75,6 +100,7 @@ export default async ({ addon, console, msg }) => {
 
     // update the bg color of the picker
     function updateColor() {
+      if (addon.self.disabled) return;
       rateLimiter.limit(() => {
         let c = getColor(element);
         let chsv = tinycolor(c).toHsv();
@@ -146,6 +172,8 @@ export default async ({ addon, console, msg }) => {
     let mouseupfunc = function (e) {
       updateFinal(e, keyPressed, originalPos);
     };
+    activePointerMove = mousemovefunc;
+    activePointerUp = mouseupfunc;
 
     function updateHandle(e, keyPressed, originalPos) {
       let cx = Math.min(Math.max(e.clientX - saColorPicker.getBoundingClientRect().x, 0), 150);
@@ -248,6 +276,10 @@ export default async ({ addon, console, msg }) => {
     ].map((i) => i.parentElement);
     saturationSlider.style.display = "none";
     brightnessSlider.style.display = "none";
+    activePicker = saColorPicker;
+    activeLabel = saColorLabel;
+    activeSliders = [saturationSlider, brightnessSlider];
+    activeColorSlider = colorSlider;
     colorSlider.insertAdjacentElement("afterend", saColorPicker);
     colorSlider.insertAdjacentElement("afterend", saColorLabel);
   }

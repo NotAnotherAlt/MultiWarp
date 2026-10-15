@@ -760,6 +760,36 @@ export default async function ({ addon, console, msg }) {
   settingsTip.appendChild(settingsTipShape);
   settingsPage.appendChild(settingsTip);
 
+  let lastDefaultSetting = addon.settings.get("default");
+  addon.settings.addEventListener("change", () => {
+    const defaultSetting = addon.settings.get("default");
+    settings.previous = +addon.settings.get("previous");
+    settings.next = +addon.settings.get("next");
+    settings.opacity = +addon.settings.get("opacity");
+    settings.opacityStep = +addon.settings.get("opacityStep");
+    settings.layering = addon.settings.get("layering");
+    settings.mode = addon.settings.get("mode");
+    settings.beforeTint = parseHexColor(addon.settings.get("beforeTint"));
+    settings.afterTint = parseHexColor(addon.settings.get("afterTint"));
+
+    for (const type of ["previous", "next", "opacity", "opacityStep"]) {
+      layerInputs[type].value = settings[type];
+    }
+    modeMergeButton.dataset.enabled = settings.mode === "merge";
+    modeTintButton.dataset.enabled = settings.mode === "tint";
+    layeringFrontButton.dataset.enabled = settings.layering === "front";
+    layeringBehindButton.dataset.enabled = settings.layering === "behind";
+
+    const defaultChanged = defaultSetting !== lastDefaultSetting;
+    lastDefaultSetting = defaultSetting;
+    if (defaultChanged) {
+      setEnabled(defaultSetting && !addon.self.disabled);
+    }
+    if (!defaultChanged || defaultSetting) {
+      settingsChanged();
+    }
+  });
+
   let oldEnabled = null;
   addon.self.addEventListener("disabled", () => {
     setSettingsOpen(false);

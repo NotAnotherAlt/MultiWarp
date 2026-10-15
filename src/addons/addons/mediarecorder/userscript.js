@@ -2,6 +2,20 @@ import downloadBlob from "../../libraries/common/cs/download-blob.js";
 
 export default async ({ addon, console, msg }) => {
   let recordElem;
+  let recordParent;
+  let cancelOptions;
+  let stopActiveRecording;
+  addon.self.addEventListener("disabled", () => {
+    if (cancelOptions) cancelOptions();
+    if (stopActiveRecording) stopActiveRecording();
+    if (recordElem) recordElem.remove();
+  });
+  addon.self.addEventListener("reenabled", () => {
+    if (recordElem && recordParent && recordParent.isConnected) {
+      recordParent.appendChild(recordElem);
+    }
+  });
+
   let isRecording = false;
   let isWaitingForFlag = false;
   let waitingForFlagFunc = null;
@@ -10,6 +24,11 @@ export default async ({ addon, console, msg }) => {
   let recordBuffer = [];
   let recorder;
   let timeout;
+  let activeStream;
+  let activeMicStream;
+  let activeAudioContext;
+  let recordingGeneration = 0;
+  let delayedStartTimeout;
 
   const mimeType = [
     // Chrome and Firefox only support encoding as webm
@@ -167,9 +186,11 @@ export default async ({ addon, console, msg }) => {
       closeButton.addEventListener("click", () => handleOptionClose(null));
 
       handleOptionClose = (value) => {
+        cancelOptions = null;
         resolvePromise(value);
         remove();
       };
+      cancelOptions = () => handleOptionClose(null);
 
       const buttonRow = Object.assign(document.createElement("div"), {
         className: addon.tab.scratchClass("prompt_button-row", { others: "mediaRecorderPopupButtons" }),
@@ -202,41 +223,68 @@ export default async ({ addon, console, msg }) => {
       return optionPromise;
     };
     const disposeRecorder = () => {
+      recordingGeneration++;
       isRecording = false;
       recordElem.textContent = msg("record");
       recordElem.title = "";
       recorder = null;
       recordBuffer = [];
       clearTimeout(timeout);
+      clearTimeout(delayedStartTimeout);
       timeout = 0;
+      delayedStartTimeout = null;
+      if (abortController) {
+        abortController.abort();
+        abortController = null;
+      }
+      if (waitingForFlagFunc) {
+        addon.tab.traps.vm.runtime.off("PROJECT_START", waitingForFlagFunc);
+        waitingForFlagFunc = null;
+      }
+      isWaitingForFlag = false;
+      if (activeStream) {
+        for (const track of activeStream.getTracks()) track.stop();
+        activeStream = null;
+      }
+      if (activeMicStream) {
+        for (const track of activeMicStream.getTracks()) track.stop();
+        activeMicStream = null;
+      }
+      if (activeAudioContext) {
+        activeAudioContext.close().catch((error) => console.warn("Could not close recording audio context:", error));
+        activeAudioContext = null;
+      }
       if (stopSignFunc) {
         addon.tab.traps.vm.runtime.off("PROJECT_STOP_ALL", stopSignFunc);
         stopSignFunc = null;
       }
     };
     const stopRecording = (force) => {
-      if (isWaitingForFlag) {
+      if (force && isWaitingForFlag) {
         addon.tab.traps.vm.runtime.off("PROJECT_START", waitingForFlagFunc);
         isWaitingForFlag = false;
         waitingForFlagFunc = null;
-        abortController.abort();
-        abortController = null;
+      }
+      if (force) {
+        if (recorder && recorder.state !== "inactive") {
+          recorder.ondataavailable = null;
+          recorder.onstop = null;
+          recorder.stop();
+        }
         disposeRecorder();
         return;
       }
       if (!isRecording || !recorder || recorder.state === "inactive") return;
-      if (force) {
+      recorder.onstop = () => {
+        const blob = new Blob(recordBuffer, { type: mimeType });
+        downloadBlob(`${addon.tab.redux.state?.preview?.projectInfo?.title || "video"}.${fileExtension}`, blob);
         disposeRecorder();
-      } else {
-        recorder.onstop = () => {
-          const blob = new Blob(recordBuffer, { type: mimeType });
-          downloadBlob(`${addon.tab.redux.state?.preview?.projectInfo?.title || "video"}.${fileExtension}`, blob);
-          disposeRecorder();
-        };
-        recorder.stop();
-      }
+      };
+      recorder.stop();
     };
     const startRecording = async (opts) => {
+      const generation = ++recordingGeneration;
+      const isCancelled = () => addon.self.disabled || generation !== recordingGeneration;
       // Timer
       const secs = Math.min(600, Math.max(1, opts.secs));
 
@@ -254,6 +302,14 @@ export default async ({ addon, console, msg }) => {
           opts.micEnabled = false;
         }
       }
+      if (isCancelled()) {
+        if (micStream) {
+          for (const track of micStream.getTracks()) track.stop();
+        }
+        if (generation === recordingGeneration) disposeRecorder();
+        return;
+      }
+      activeMicStream = micStream || null;
       if (opts.waitUntilFlag) {
         isWaitingForFlag = true;
         Object.assign(recordElem, {
@@ -268,21 +324,24 @@ export default async ({ addon, console, msg }) => {
               vm.runtime.once("PROJECT_START", waitingForFlagFunc);
             }),
             new Promise((_, reject) => {
-              abortController.signal.addEventListener("abort", () => reject("aborted"), { once: true });
+              abortController.signal.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
             }),
           ]);
         } catch (e) {
-          if (e.message === "aborted") return;
+          if (e.message === "aborted" || isCancelled()) return;
           throw e;
         }
       }
+      if (isCancelled()) return;
       isWaitingForFlag = false;
       waitingForFlagFunc = abortController = null;
       const stream = new MediaStream();
+      activeStream = stream;
       const videoStream = vm.runtime.renderer.canvas.captureStream();
       stream.addTrack(videoStream.getVideoTracks()[0]);
 
       const ctx = new AudioContext();
+      activeAudioContext = ctx;
       const dest = ctx.createMediaStreamDestination();
       if (opts.audioEnabled) {
         const mediaStreamDestination = vm.runtime.audioEngine.audioContext.createMediaStreamDestination();
@@ -305,7 +364,6 @@ export default async ({ addon, console, msg }) => {
         console.warn("Recorder error:", e.error);
         stopRecording(true);
       };
-      timeout = setTimeout(() => stopRecording(false), secs * 1000);
       if (opts.useStopSign) {
         stopSignFunc = () => stopRecording();
         vm.runtime.once("PROJECT_STOP_ALL", stopSignFunc);
@@ -315,14 +373,23 @@ export default async ({ addon, console, msg }) => {
       const delay = opts.delay || 0;
       const roundedDelay = Math.floor(delay);
       for (let index = 0; index < roundedDelay; index++) {
+        if (isCancelled()) return;
         recordElem.textContent = msg("starting-in", { secs: roundedDelay - index });
         await new Promise((resolve) => setTimeout(resolve, 975));
       }
-      setTimeout(
+      if (isCancelled() || !recorder) return;
+      delayedStartTimeout = setTimeout(
         () => {
+          delayedStartTimeout = null;
+          if (isCancelled() || !recorder) return;
           recordElem.textContent = msg("stop");
-
-          recorder.start(1000);
+          try {
+            recorder.start(1000);
+            timeout = setTimeout(() => stopRecording(false), secs * 1000);
+          } catch (error) {
+            console.error("Could not start project recording:", error);
+            stopRecording(true);
+          }
         },
         (delay - roundedDelay) * 1000
       );
@@ -333,6 +400,7 @@ export default async ({ addon, console, msg }) => {
         textContent: msg("record"),
       });
       recordElem.addEventListener("click", async () => {
+        if (addon.self.disabled) return;
         if (isRecording) {
           stopRecording();
         } else {
@@ -341,10 +409,18 @@ export default async ({ addon, console, msg }) => {
             console.log("Canceled");
             return;
           }
-          startRecording(opts);
+          if (addon.self.disabled) return;
+          try {
+            await startRecording(opts);
+          } catch (error) {
+            stopRecording(true);
+            console.error("Could not start project recording:", error);
+          }
         }
       });
     }
-    elem.parentElement.appendChild(recordElem);
+    recordParent = elem.parentElement;
+    stopActiveRecording = () => stopRecording(true);
+    if (!addon.self.disabled) recordParent.appendChild(recordElem);
   }
 };

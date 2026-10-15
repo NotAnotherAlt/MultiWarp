@@ -4,6 +4,7 @@ const manifest = {
   "noTranslations": true,
   "name": "Disable compiler in editor",
   "description": "Turns off the compiler by default in the script editor. It can still be manually enabled through the \"Advanced\" menu bar button.",
+  "dynamicDisable": true,
   "userscripts": [
     {
       "url": "userscript.js"

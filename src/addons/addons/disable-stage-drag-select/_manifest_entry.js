@@ -27,7 +27,8 @@ const manifest = {
       "name": "Allow dragging while project is stopped",
       "id": "drag_while_stopped",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "dynamic": true
     }
   ],
   "tags": [],

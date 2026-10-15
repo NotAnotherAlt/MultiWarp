@@ -3,6 +3,7 @@ export default async function ({ addon, console }) {
 
   let controlsRect;
   let previousIsHovered = false;
+  const workspaces = new Map();
   const speeds = {
     none: "0s",
     short: "0.2s",
@@ -16,22 +17,40 @@ export default async function ({ addon, console }) {
   function update() {
     document.removeEventListener("mousemove", onMouseMove);
 
-    if (addon.tab.editorMode !== "editor") return;
+    if (addon.self.disabled || addon.tab.editorMode !== "editor") return;
 
-    Blockly.getMainWorkspace().options.zoomOptions.maxScale = addon.settings.get("maxZoom") / 100;
-    Blockly.getMainWorkspace().options.zoomOptions.minScale = addon.settings.get("minZoom") / 100;
-    Blockly.getMainWorkspace().options.zoomOptions.startScale = addon.settings.get("startZoom") / 100;
-    Blockly.getMainWorkspace().options.zoomOptions.scaleSpeed = 1 + 0.2 * (addon.settings.get("zoomSpeed") / 100);
+    const workspace = Blockly.getMainWorkspace();
+    if (!workspaces.has(workspace)) {
+      workspaces.set(workspace, {...workspace.options.zoomOptions});
+    }
+    workspace.options.zoomOptions.maxScale = addon.settings.get("maxZoom") / 100;
+    workspace.options.zoomOptions.minScale = addon.settings.get("minZoom") / 100;
+    workspace.options.zoomOptions.startScale = addon.settings.get("startZoom") / 100;
+    workspace.options.zoomOptions.scaleSpeed = 1 + 0.2 * (addon.settings.get("zoomSpeed") / 100);
 
     const svgGroup = getZoomControls();
     const autohide = addon.settings.get("autohide");
     if (svgGroup) svgGroup.classList.toggle("sa-custom-zoom-hidden", autohide);
     if (autohide) {
       const injectionDiv = document.querySelector(".injectionDiv");
-      injectionDiv.appendChild(customZoomAreaElement);
+      if (injectionDiv) injectionDiv.appendChild(customZoomAreaElement);
       updateRect();
       document.addEventListener("mousemove", onMouseMove);
     }
+  }
+
+  function disable() {
+    document.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("resize", onResize);
+    for (const [workspace, zoomOptions] of workspaces) {
+      Object.assign(workspace.options.zoomOptions, zoomOptions);
+      const svgGroup = workspace.zoomControls_ && workspace.zoomControls_.svgGroup_;
+      if (svgGroup) {
+        svgGroup.classList.remove("sa-custom-zoom-hidden");
+        svgGroup.style.removeProperty("--sa-custom-zoom-speed");
+      }
+    }
+    customZoomAreaElement.remove();
   }
 
   function getZoomControls() {
@@ -68,6 +87,11 @@ export default async function ({ addon, console }) {
   }
   addon.settings.addEventListener("change", update);
   window.addEventListener("resize", onResize);
+  addon.self.addEventListener("disabled", disable);
+  addon.self.addEventListener("reenabled", () => {
+    window.addEventListener("resize", onResize);
+    update();
+  });
   while (true) {
     await addon.tab.waitForElement(".blocklyZoom", {
       markAsSeen: true,

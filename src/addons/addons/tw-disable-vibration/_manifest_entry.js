@@ -3,6 +3,7 @@ const manifest = {
   "noTranslations": true,
   "name": "Disable vibrations",
   "description": "Prevents the vibration and gamepad extensions from causing vibrations.",
+  "dynamicDisable": true,
   "userscripts": [
     {
       "url": "userscript.js"

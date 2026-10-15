@@ -46,6 +46,9 @@ export default async function ({ addon, console }) {
     }
   });
   setVolume(addon.settings.get("defVol") / 100);
+  addon.settings.addEventListener("change", () => {
+    setVolume(addon.settings.get("defVol") / 100);
+  });
 
   const container = document.createElement("div");
   container.className = "sa-vol-slider";

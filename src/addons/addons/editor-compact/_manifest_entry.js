@@ -55,7 +55,8 @@ const manifest = {
       "id": "hideLabels",
       "type": "boolean",
       "name": "Hide button labels in costume and sound editor",
-      "default": true
+      "default": true,
+      "dynamic": true
     }
   ],
   "dynamicDisable": true,

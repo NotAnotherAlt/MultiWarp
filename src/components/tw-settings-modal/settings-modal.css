@@ -4,6 +4,42 @@
 
 .modal-content {
     max-width: 750px;
+    animation: settings-modal-enter 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.modal-content-closing {
+    animation: settings-modal-exit 250ms ease-in both;
+}
+.modal-overlay {
+    animation: settings-modal-fade-in 250ms ease-out both;
+}
+.modal-overlay-closing {
+    animation: settings-modal-fade-out 250ms ease-in both;
+}
+
+@keyframes settings-modal-enter {
+    from { transform: translateY(100vh); }
+    to { transform: translateY(0); }
+}
+@keyframes settings-modal-exit {
+    from { transform: translateY(0); }
+    to { transform: translateY(100vh); }
+}
+@keyframes settings-modal-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes settings-modal-fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .modal-content,
+    .modal-content-closing,
+    .modal-overlay,
+    .modal-overlay-closing {
+        animation-duration: 1ms;
+    }
 }
 
 .body {

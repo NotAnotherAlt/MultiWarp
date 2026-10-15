@@ -28,6 +28,8 @@ import TWStateManagerHOC from '../lib/tw-state-manager-hoc.jsx';
 import SBFileUploaderHOC from '../lib/sb-file-uploader-hoc.jsx';
 import TWPackagerIntegrationHOC from '../lib/tw-packager-integration-hoc.jsx';
 import SettingsStore from '../addons/settings-store-singleton';
+import downloadBlob from '../lib/download-blob.js';
+import AddonSettings from '../addons/settings/settings.jsx';
 import '../lib/tw-fix-history-api';
 import GUI from './render-gui.jsx';
 import MenuBar from '../components/menu-bar/menu-bar.jsx';
@@ -47,13 +49,6 @@ import {APP_NAME} from '../lib/brand.js';
 import styles from './interface.css';
 
 const isInvalidEmbed = window.parent !== window;
-
-const handleClickAddonSettings = addonId => {
-    // addonId might be a string of the addon to focus on, undefined, or an event (treat like undefined)
-    const path = process.env.ROUTING_STYLE === 'wildcard' ? 'addons' : 'addons.html';
-    const url = `${process.env.ROOT}${path}${typeof addonId === 'string' ? `#${addonId}` : ''}`;
-    window.open(url);
-};
 
 const messages = defineMessages({
     defaultTitle: {
@@ -190,11 +185,60 @@ class Interface extends React.Component {
     constructor (props) {
         super(props);
         this.handleUpdateProjectTitle = this.handleUpdateProjectTitle.bind(this);
+        this.handleClickAddonSettings = this.handleClickAddonSettings.bind(this);
+        this.handleCloseAddonSettings = this.handleCloseAddonSettings.bind(this);
+        this.handleAddonSettingsAnimationEnd = this.handleAddonSettingsAnimationEnd.bind(this);
+        this.handleAddonSettingsPanelClick = this.handleAddonSettingsPanelClick.bind(this);
+        this.handleAddonSettingsExport = this.handleAddonSettingsExport.bind(this);
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.state = {
+            addonSettingsOpen: false,
+            addonSettingsClosing: false,
+            addonSettingsInitialSearch: ''
+        };
+    }
+    componentDidMount () {
+        document.addEventListener('keydown', this.handleKeyDown);
     }
     componentDidUpdate (prevProps) {
         if (prevProps.isLoading && !this.props.isLoading) {
             loadServiceWorker();
         }
+    }
+    componentWillUnmount () {
+        document.removeEventListener('keydown', this.handleKeyDown);
+    }
+    handleClickAddonSettings (addonId) {
+        this.setState({
+            addonSettingsOpen: true,
+            addonSettingsClosing: false,
+            addonSettingsInitialSearch: typeof addonId === 'string' ? addonId : ''
+        });
+    }
+    handleCloseAddonSettings () {
+        if (this.state.addonSettingsOpen) {
+            this.setState({addonSettingsClosing: true});
+        }
+    }
+    handleAddonSettingsAnimationEnd (event) {
+        if (event.target === event.currentTarget && this.state.addonSettingsClosing) {
+            this.setState({
+                addonSettingsOpen: false,
+                addonSettingsClosing: false
+            });
+        }
+    }
+    handleKeyDown (event) {
+        if (event.key === 'Escape') {
+            this.handleCloseAddonSettings();
+        }
+    }
+    handleAddonSettingsPanelClick (event) {
+        event.stopPropagation();
+    }
+    handleAddonSettingsExport (settings) {
+        const blob = new Blob([JSON.stringify(settings)]);
+        downloadBlob('turbowarp-addon-settings.json', blob);
     }
     handleUpdateProjectTitle (title, isDefault) {
         if (isDefault || !title) {
@@ -239,7 +283,7 @@ class Interface extends React.Component {
                             canManageFiles
                             canChangeTheme
                             enableSeeInside
-                            onClickAddonSettings={handleClickAddonSettings}
+                            onClickAddonSettings={this.handleClickAddonSettings}
                         />
                     </div>
                 ) : null}
@@ -251,7 +295,7 @@ class Interface extends React.Component {
                     }) : null}
                 >
                     <GUI
-                        onClickAddonSettings={handleClickAddonSettings}
+                        onClickAddonSettings={this.handleClickAddonSettings}
                         onUpdateProjectTitle={this.handleUpdateProjectTitle}
                         backpackVisible
                         backpackHost="_local_"
@@ -299,6 +343,32 @@ class Interface extends React.Component {
                     ) : null}
                 </div>
                 {isHomepage && <Footer />}
+                {this.state.addonSettingsOpen && (
+                    <div
+                        className={classNames(styles.addonSettingsOverlay, {
+                            [styles.addonSettingsOverlayClosing]: this.state.addonSettingsClosing
+                        })}
+                        onAnimationEnd={this.handleAddonSettingsAnimationEnd}
+                        onClick={this.handleCloseAddonSettings}
+                    >
+                        <div
+                            className={classNames(styles.addonSettingsPanel, {
+                                [styles.addonSettingsPanelClosing]: this.state.addonSettingsClosing
+                            })}
+                            role="dialog"
+                            aria-modal="true"
+                            aria-label="Add-on settings"
+                            onClick={this.handleAddonSettingsPanelClick}
+                        >
+                            <AddonSettings
+                                initialSearch={this.state.addonSettingsInitialSearch}
+                                preserveHash
+                                onClose={this.handleCloseAddonSettings}
+                                onExportSettings={this.handleAddonSettingsExport}
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }

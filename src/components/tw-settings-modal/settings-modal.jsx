@@ -1,7 +1,7 @@
 import {defineMessages, FormattedMessage, intlShape, injectIntl} from 'react-intl';
 import PropTypes from 'prop-types';
-import React from 'react';
 import classNames from 'classnames';
+import React from 'react';
 import bindAll from 'lodash.bindall';
 import Box from '../box/box.jsx';
 import Modal from '../../containers/modal.jsx';
@@ -434,7 +434,12 @@ Header.propTypes = {
 
 const SettingsModalComponent = props => (
     <Modal
-        className={styles.modalContent}
+        className={classNames(styles.modalContent, {
+            [styles.modalContentClosing]: props.isClosing
+        })}
+        overlayClassName={classNames(styles.modalOverlay, {
+            [styles.modalOverlayClosing]: props.isClosing
+        })}
         onRequestClose={props.onClose}
         contentLabel={props.intl.formatMessage(messages.title)}
         id="settingsModal"
@@ -511,6 +516,7 @@ const SettingsModalComponent = props => (
 SettingsModalComponent.propTypes = {
     intl: intlShape,
     onClose: PropTypes.func,
+    isClosing: PropTypes.bool,
     isEmbedded: PropTypes.bool,
     framerate: PropTypes.number,
     onFramerateChange: PropTypes.func,

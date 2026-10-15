@@ -3,6 +3,7 @@ const manifest = {
   "editorOnly": true,
   "name": "Developer tools",
   "description": "Adds new menu options to the editor: copy/paste blocks, better clean up, and more!",
+  "dynamicDisable": true,
   "credits": [
     {
       "name": "griffpatch"

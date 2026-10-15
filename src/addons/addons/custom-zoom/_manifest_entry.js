@@ -4,6 +4,7 @@ const manifest = {
   "noTranslations": true,
   "name": "Customizable code area zoom",
   "description": "Choose custom settings for the minimum, maximum, speed, and start size of the zoom of scripts in the code area, and autohide the controls.",
+  "dynamicDisable": true,
   "tags": [],
   "credits": [
     {
@@ -38,7 +39,7 @@ const manifest = {
       "id": "minZoom",
       "type": "integer",
       "min": 1,
-      "default": 30,
+      "default": 10,
       "max": 100
     },
     {
@@ -60,6 +61,7 @@ const manifest = {
       "max": 200
     },
     {
+      "dynamic": true,
       "name": "Autohide Zoom Controls",
       "id": "autohide",
       "type": "boolean",

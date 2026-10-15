@@ -1,4 +1,5 @@
 import SettingStore from '../../../src/addons/settings-store';
+import addons from '../../../src/addons/generated/addon-manifests';
 import upstreamMeta from '../../../src/addons/generated/upstream-meta.json';
 
 class LocalStorageShim {
@@ -52,6 +53,82 @@ test('enabled, event', () => {
     expect(fn.mock.calls[3][0].detail.addonId).toBe('cat-blocks');
     expect(fn.mock.calls[3][0].detail.settingId).toBe('enabled');
     expect(fn.mock.calls[3][0].detail.value).toBe(false);
+});
+
+test('changes notify addons running in the same page', () => {
+    const store = new SettingStore();
+    const fn = jest.fn();
+    store.addEventListener('addon-changed', fn);
+
+    store.setAddonEnabled('editor-devtools', false);
+    expect(fn.mock.calls[0][0].detail).toEqual({
+        addonId: 'editor-devtools',
+        dynamicEnable: false,
+        dynamicDisable: true
+    });
+
+    store.setAddonEnabled('editor-devtools', true);
+    expect(fn.mock.calls[1][0].detail).toEqual({
+        addonId: 'editor-devtools',
+        dynamicEnable: true,
+        dynamicDisable: false
+    });
+
+    store.setAddonSetting('custom-zoom', 'minZoom', 20);
+    expect(fn.mock.calls[2][0].detail).toEqual({
+        addonId: 'custom-zoom',
+        dynamicEnable: false,
+        dynamicDisable: false
+    });
+});
+
+test('lifecycle-aware addons can be disabled dynamically', () => {
+    const store = new SettingStore();
+    const fn = jest.fn();
+    store.addEventListener('addon-changed', fn);
+
+    for (const addonId of [
+        '2d-color-picker',
+        'cat-blocks',
+        'custom-zoom',
+        'debugger',
+        'editor-devtools',
+        'folders',
+        'mediarecorder',
+        'middle-click-popup',
+        'tw-disable-cloud-variables',
+        'tw-disable-compiler',
+        'tw-disable-vibration'
+    ]) {
+        store.setAddonEnabled(addonId, true);
+        if (!store.getAddonEnabled(addonId)) continue;
+        store.setAddonEnabled(addonId, false);
+        expect(fn.mock.calls[fn.mock.calls.length - 1][0].detail).toEqual({
+            addonId,
+            dynamicEnable: false,
+            dynamicDisable: true
+        });
+
+    }
+});
+
+test('live settings are marked dynamic', () => {
+    const dynamicSettings = [
+        ['cat-blocks', 'watch'],
+        ['disable-stage-drag-select', 'drag_while_stopped'],
+        ['editor-compact', 'hideLabels'],
+        ['load-extensions', 'music'],
+        ['load-extensions', 'pen'],
+        ['load-extensions', 'text2speech'],
+        ['load-extensions', 'translate'],
+        ['onion-skinning', 'default'],
+        ['onion-skinning', 'beforeTint'],
+        ['vol-slider', 'defVol']
+    ];
+    for (const [addonId, settingId] of dynamicSettings) {
+        const setting = addons[addonId].settings.find(item => item.id === settingId);
+        expect(setting.dynamic).toBe(true);
+    }
 });
 
 test('settings, event, default values', () => {

@@ -30,8 +30,21 @@ class UsernameModal extends React.Component {
             'handleStageWidthChange',
             'handleStageHeightChange',
             'handleDisableCompilerChange',
-            'handleStoreProjectOptions'
+            'handleStoreProjectOptions',
+            'handleClose'
         ]);
+        this.state = {
+            closing: false
+        };
+        this.closeTimeout = null;
+    }
+    componentWillUnmount () {
+        clearTimeout(this.closeTimeout);
+    }
+    handleClose () {
+        if (this.state.closing) return;
+        this.setState({closing: true});
+        this.closeTimeout = setTimeout(this.props.onClose, 250);
     }
     handleFramerateChange (e) {
         this.props.vm.setFramerate(e.target.checked ? 60 : 30);
@@ -95,7 +108,8 @@ class UsernameModal extends React.Component {
         } = this.props;
         return (
             <SettingsModalComponent
-                onClose={this.props.onClose}
+                isClosing={this.state.closing}
+                onClose={this.handleClose}
                 onFramerateChange={this.handleFramerateChange}
                 onCustomizeFramerate={this.handleCustomizeFramerate}
                 onHighQualityPenChange={this.handleHighQualityPenChange}
