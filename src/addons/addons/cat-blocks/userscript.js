@@ -14,15 +14,22 @@ export default async function ({ addon, console }) {
   const refreshBlocks = () => {
     const workspace = Blockly.getMainWorkspace();
     if (workspace) {
-      for (const block of workspace.getAllBlocks(false)) {
-        if (block.windowListener) document.removeEventListener("mousemove", block.windowListener);
-        block.render();
-        if (block.windowListener && block.shouldWatchMouse() && !block.isGlowingStack_) {
-          document.addEventListener("mousemove", block.windowListener);
+      const workspaces = [workspace];
+      const flyout = workspace.getFlyout();
+      if (flyout) {
+        workspaces.push(flyout.getWorkspace());
+      }
+      for (const blockWorkspace of workspaces) {
+        for (const block of blockWorkspace.getAllBlocks(false)) {
+          if (block.windowListener) document.removeEventListener("mousemove", block.windowListener);
+          block.render();
+          if (block.windowListener && block.shouldWatchMouse() && !block.isGlowingStack_) {
+            document.addEventListener("mousemove", block.windowListener);
+          }
         }
       }
-      const flyout = workspace.getFlyout();
-      if (flyout) workspace.getToolbox().refreshSelection();
+      const toolbox = workspace.getToolbox();
+      if (flyout && toolbox) toolbox.refreshSelection();
     }
   };
   const restoreCatConstants = () => Object.assign(Blockly.BlockSvg, originalCatConstants);

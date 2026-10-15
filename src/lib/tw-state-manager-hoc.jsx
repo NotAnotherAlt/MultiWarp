@@ -98,29 +98,60 @@ class HashRouter extends Router {
 class FileHashRouter extends HashRouter {
     constructor (callbacks) {
         super(callbacks);
+        this.pagePath = location.pathname;
         this.playerPath = location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1);
         this.editorPath = `${this.playerPath}editor.html`;
         this.fullscreenPath = `${this.playerPath}fullscreen.html`;
+        this.pagePathIsPlayerOnly = this.pagePath === this.playerPath || /\/index\.html$/.test(this.pagePath);
+    }
+
+    onhashchange () {
+        super.onhashchange();
+        this.onpathchange();
     }
 
     onpathchange () {
         const pathName = location.pathname;
+        if (pathName === this.fullscreenPath) {
+            this.onSetIsFullScreen(true);
+            return;
+        }
 
-        if (pathName === this.playerPath) {
+        this.onSetIsFullScreen(false);
+        if (pathName === this.pagePath) {
+            const view = new URLSearchParams(location.search).get('tw-view');
+            if (view === 'editor') {
+                this.onSetIsPlayerOnly(false);
+            } else if (view === 'player') {
+                this.onSetIsPlayerOnly(true);
+            } else {
+                this.onSetIsPlayerOnly(this.pagePathIsPlayerOnly);
+            }
+        } else if (pathName === this.playerPath) {
             this.onSetIsPlayerOnly(true);
-            this.onSetIsFullScreen(false);
         } else if (pathName === this.editorPath) {
             this.onSetIsPlayerOnly(false);
-            this.onSetIsFullScreen(false);
-        } else if (pathName === this.fullscreenPath) {
-            this.onSetIsFullScreen(true);
         }
     }
 
     generateURL ({projectId, isPlayerOnly, isFullScreen}) {
-        let newPathname = '';
-        let newHash = '';
+        let newPathname;
+        if (isFullScreen) {
+            newPathname = this.fullscreenPath;
+        } else if (this.pagePath === this.fullscreenPath) {
+            newPathname = isPlayerOnly ? this.playerPath : this.editorPath;
+        } else {
+            newPathname = this.pagePath;
+        }
 
+        const searchParams = new URLSearchParams(location.search);
+        searchParams.delete('tw-view');
+        if (!isFullScreen && newPathname === this.pagePath && isPlayerOnly !== this.pagePathIsPlayerOnly) {
+            searchParams.set('tw-view', isPlayerOnly ? 'player' : 'editor');
+        }
+        const search = searchParams.toString();
+
+        let newHash = '';
         if (projectId !== '0') {
             newHash = projectId;
         }
@@ -129,15 +160,7 @@ class FileHashRouter extends HashRouter {
             newHash += `?${hashQuery}`;
         }
 
-        if (isFullScreen) {
-            newPathname = this.fullscreenPath;
-        } else if (isPlayerOnly) {
-            newPathname = this.playerPath;
-        } else {
-            newPathname = this.editorPath;
-        }
-
-        return `${newPathname}${location.search}${newHash ? `#${newHash}` : ''}`;
+        return `${newPathname}${search ? `?${search}` : ''}${newHash ? `#${newHash}` : ''}`;
     }
 }
 

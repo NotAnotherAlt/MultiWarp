@@ -190,12 +190,24 @@ class Interface extends React.Component {
         this.handleAddonSettingsAnimationEnd = this.handleAddonSettingsAnimationEnd.bind(this);
         this.handleAddonSettingsPanelClick = this.handleAddonSettingsPanelClick.bind(this);
         this.handleAddonSettingsExport = this.handleAddonSettingsExport.bind(this);
+        this.handlePageTransitionEnd = this.handlePageTransitionEnd.bind(this);
         this.handleKeyDown = this.handleKeyDown.bind(this);
         this.state = {
             addonSettingsOpen: false,
             addonSettingsClosing: false,
-            addonSettingsInitialSearch: ''
+            addonSettingsInitialSearch: '',
+            lastPlayerOnly: props.isPlayerOnly,
+            pageTransitioning: false
         };
+    }
+    static getDerivedStateFromProps (props, state) {
+        if (props.isPlayerOnly !== state.lastPlayerOnly) {
+            return {
+                lastPlayerOnly: props.isPlayerOnly,
+                pageTransitioning: true
+            };
+        }
+        return null;
     }
     componentDidMount () {
         document.addEventListener('keydown', this.handleKeyDown);
@@ -236,6 +248,11 @@ class Interface extends React.Component {
     handleAddonSettingsPanelClick (event) {
         event.stopPropagation();
     }
+    handlePageTransitionEnd (event) {
+        if (event.target === event.currentTarget && this.state.pageTransitioning) {
+            this.setState({pageTransitioning: false});
+        }
+    }
     handleAddonSettingsExport (settings) {
         const blob = new Blob([JSON.stringify(settings)]);
         downloadBlob('turbowarp-addon-settings.json', blob);
@@ -271,8 +288,10 @@ class Interface extends React.Component {
             <div
                 className={classNames(styles.container, {
                     [styles.playerOnly]: isHomepage,
-                    [styles.editor]: isEditor
+                    [styles.editor]: isEditor,
+                    [styles.pageTransitioning]: this.state.pageTransitioning
                 })}
+                onAnimationEnd={this.handlePageTransitionEnd}
                 dir={isRtl ? 'rtl' : 'ltr'}
             >
                 <TWWindchimeSubmitter />

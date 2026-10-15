@@ -22,6 +22,12 @@ test project in the editor to check changes before deploying. Stop the server wi
 Ctrl+C when you're done. In GitHub Codespaces or another remote environment, open
 port `8601` from the forwarded ports panel if localhost is not accessible directly.
 
+Use **See project** and **See inside** to switch between the running project and
+editor without reloading the currently open document. The view transition is
+animated, and the Blockly workspace is removed while the project-only view is
+shown; the project continues running in the VM. The development build still
+provides separate `index.html` and `editor.html` entry points for direct links.
+
 ## Local Extensions
 
 Put extension JavaScript files in the root `extensions/` directory. Add each one to
@@ -64,7 +70,12 @@ npx netlify deploy --prod --dir=build --no-build
 
 ## Custom Changes
 
-Added custom images for the following extensions
+The local MultiWarp customizations include:
 
-- steamworks
-- numerical-encoding V1
+- Custom images for the `steamworks` and `numerical-encoding V1` extensions.
+- An animated, same-document transition between the editor and project-only view;
+  the current view is retained in browser history.
+- The Blockly workspace is culled in project-only mode while scripts continue to
+  run. Reopening the editor restores the block workspace.
+- Cat Blocks refreshes the main workspace and toolbox flyout when toggled, so cat
+  decorations disappear from the code sidebar when disabled.
