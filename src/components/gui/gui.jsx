@@ -38,7 +38,12 @@ import TWFontsModal from '../../containers/tw-fonts-modal.jsx';
 import TWUnknownPlatformModal from '../../containers/tw-unknown-platform-modal.jsx';
 import TWInvalidProjectModal from '../../containers/tw-invalid-project-modal.jsx';
 
-import {STAGE_SIZE_MODES, FIXED_WIDTH, UNCONSTRAINED_NON_STAGE_WIDTH} from '../../lib/layout-constants';
+import {
+    BLOCKS_DEFAULT_SCALE,
+    STAGE_SIZE_MODES,
+    FIXED_WIDTH,
+    UNCONSTRAINED_NON_STAGE_WIDTH
+} from '../../lib/layout-constants';
 import {resolveStageSize} from '../../lib/screen-utils';
 import {Theme} from '../../lib/themes';
 
@@ -179,6 +184,8 @@ const GUIComponent = props => {
         FIXED_WIDTH +
         Math.max(0, customStageSize.width - FIXED_WIDTH)
     );
+    const isMobilePreview = typeof document !== 'undefined' &&
+        document.body.classList.contains('mobile-preview');
     return (<MediaQuery minWidth={unconstrainedWidth}>{isUnconstrained => {
         const stageSize = resolveStageSize(stageSizeMode, isUnconstrained);
 
@@ -225,7 +232,7 @@ const GUIComponent = props => {
             </React.Fragment>
         ) : (
             <Box
-                className={styles.pageWrapper}
+                className={classNames(styles.pageWrapper, 'multiwarp-gui')}
                 dir={isRtl ? 'rtl' : 'ltr'}
                 style={{
                     minWidth: 1024 + Math.max(0, customStageSize.width - 480),
@@ -300,7 +307,7 @@ const GUIComponent = props => {
                     canRemix={canRemix}
                     canSave={canSave}
                     canShare={canShare}
-                    className={styles.menuBarPosition}
+                    className={classNames(styles.menuBarPosition, 'multiwarp-mobile-menu')}
                     enableCommunity={enableCommunity}
                     isShared={isShared}
                     isTotallyNormal={isTotallyNormal}
@@ -326,8 +333,8 @@ const GUIComponent = props => {
                     onToggleLoginOpen={onToggleLoginOpen}
                 />
                 <Box className={styles.bodyWrapper}>
-                    <Box className={styles.flexWrapper}>
-                        <Box className={styles.editorWrapper}>
+                    <Box className={classNames(styles.flexWrapper, 'multiwarp-layout')}>
+                        <Box className={classNames(styles.editorWrapper, 'multiwarp-editor-pane')}>
                             <Tabs
                                 forceRenderTabPanel
                                 className={tabClassNames.tabs}
@@ -393,7 +400,11 @@ const GUIComponent = props => {
                                             grow={1}
                                             isVisible={blocksTabVisible}
                                             options={{
-                                                media: `${basePath}static/${theme.getBlocksMediaFolder()}/`
+                                                media: `${basePath}static/${theme.getBlocksMediaFolder()}/`,
+                                                zoom: {
+                                                    startScale: isMobilePreview ?
+                                                        BLOCKS_DEFAULT_SCALE * 1.2 : BLOCKS_DEFAULT_SCALE
+                                                }
                                             }}
                                             stageSize={stageSize}
                                             onOpenCustomExtensionModal={onOpenCustomExtensionModal}
@@ -432,7 +443,13 @@ const GUIComponent = props => {
                             ) : null}
                         </Box>
 
-                        <Box className={classNames(styles.stageAndTargetWrapper, styles[stageSize])}>
+                        <Box
+                            className={classNames(
+                                styles.stageAndTargetWrapper,
+                                styles[stageSize],
+                                'multiwarp-stage-pane'
+                            )}
+                        >
                             <StageWrapper
                                 isFullScreen={isFullScreen}
                                 isRendererSupported={isRendererSupported()}
@@ -440,7 +457,7 @@ const GUIComponent = props => {
                                 stageSize={stageSize}
                                 vm={vm}
                             />
-                            <Box className={styles.targetWrapper}>
+                            <Box className={classNames(styles.targetWrapper, 'multiwarp-target-pane')}>
                                 <TargetPane
                                     stageSize={stageSize}
                                     vm={vm}

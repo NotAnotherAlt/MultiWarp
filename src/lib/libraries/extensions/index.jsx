@@ -55,10 +55,19 @@ import returnIcon from './custom/return.svg';
 import galleryIcon from './gallery/gallery.svg';
 import {APP_NAME} from '../../brand';
 
-const localExtensionsBaseURL = new URL(
-    `${process.env.ROOT}static/extensions/`,
-    window.location.origin
-).href;
+const offlineBundle = window.__MULTIWARP_OFFLINE__;
+const localExtensionsBaseURL = offlineBundle ?
+    null :
+    new URL(
+        `${process.env.ROOT}static/extensions/`,
+        window.location.origin
+    ).href;
+const faceSensingExtensionURL = offlineBundle ?
+    offlineBundle.extensionURLsByPath['upstream/lab/face-sensing.js'] :
+    `${localExtensionsBaseURL}lab/face-sensing.js`;
+const galleryMetadataURL = offlineBundle ?
+    offlineBundle.assetURLs['static/extensions/generated-metadata/extensions-v0.json'] :
+    `${process.env.ROOT}static/extensions/generated-metadata/extensions-v0.json`;
 
 export default [
     {
@@ -133,7 +142,7 @@ export default [
             />
         ),
         extensionId: 'faceSensing',
-        extensionURL: `${localExtensionsBaseURL}lab/face-sensing.js`,
+        extensionURL: faceSensingExtensionURL,
         iconURL: faceSensingIconURL,
         insetIconURL: faceSensingInsetIconURL,
         description: (
@@ -445,7 +454,7 @@ export const galleryLoading = {
             }}
         />
     ),
-    href: `${process.env.ROOT}static/extensions/generated-metadata/extensions-v0.json`,
+    href: galleryMetadataURL,
     extensionId: 'gallery',
     iconURL: galleryIcon,
     description: (
@@ -471,7 +480,7 @@ export const galleryMore = {
             }}
         />
     ),
-    href: `${process.env.ROOT}static/extensions/generated-metadata/extensions-v0.json`,
+    href: galleryMetadataURL,
     extensionId: 'gallery',
     iconURL: galleryIcon,
     description: (
@@ -497,7 +506,7 @@ export const galleryError = {
             }}
         />
     ),
-    href: `${process.env.ROOT}static/extensions/generated-metadata/extensions-v0.json`,
+    href: galleryMetadataURL,
     extensionId: 'gallery',
     iconURL: galleryIcon,
     description: (

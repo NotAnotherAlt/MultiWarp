@@ -43,6 +43,56 @@ describe('rewrite bundled project extension URLs', () => {
         );
     });
 
+    test('rewrites bundled extensions to embedded file URLs in offline mode', async () => {
+        global.window.__MULTIWARP_OFFLINE__ = {
+            extensionURLsByPath: {
+                'Deltatime.js': 'file:///multiwarp-offline/static/extensions/Deltatime.js',
+                'LooksPlus.js': 'file:///multiwarp-offline/static/extensions/LooksPlus.js',
+                'upstream/Xeltalliv/clippingblending.js':
+                    'file:///multiwarp-offline/static/extensions/upstream/Xeltalliv/clippingblending.js',
+                'upstream/obviousAlexC/penPlus.js':
+                    'file:///multiwarp-offline/static/extensions/upstream/obviousAlexC/penPlus.js'
+            }
+        };
+
+        try {
+            const rewritten = await rewriteBundledExtensionURLs(project);
+            expect(rewritten.extensionURLs).toEqual({
+                dtbyxeroname: 'file:///multiwarp-offline/static/extensions/Deltatime.js',
+                gdcollision: project.extensionURLs.gdcollision,
+                lmsLooksPlus: 'file:///multiwarp-offline/static/extensions/LooksPlus.js',
+                xeltallivclipblend:
+                    'file:///multiwarp-offline/static/extensions/upstream/Xeltalliv/clippingblending.js',
+                penP: 'file:///multiwarp-offline/static/extensions/upstream/obviousAlexC/penPlus.js'
+            });
+        } finally {
+            delete global.window.__MULTIWARP_OFFLINE__;
+        }
+    });
+
+    test('rewrites hosted project extension URLs to bundled offline extensions', async () => {
+        global.window.__MULTIWARP_OFFLINE__ = {
+            extensionURLsByPath: {
+                'LooksPlus.js': 'file:///multiwarp-offline/static/extensions/LooksPlus.js'
+            }
+        };
+        const hostedProject = {
+            extensions: ['lmsLooksPlus'],
+            extensionURLs: {
+                lmsLooksPlus: 'https://example.app/static/extensions/LooksPlus.js'
+            }
+        };
+
+        try {
+            const rewritten = await rewriteBundledExtensionURLs(hostedProject);
+            expect(rewritten.extensionURLs.lmsLooksPlus).toBe(
+                'file:///multiwarp-offline/static/extensions/LooksPlus.js'
+            );
+        } finally {
+            delete global.window.__MULTIWARP_OFFLINE__;
+        }
+    });
+
     test('rewrites projects inside SB3 archives', async () => {
         const zip = new JSZip();
         zip.file('project.json', JSON.stringify(project));

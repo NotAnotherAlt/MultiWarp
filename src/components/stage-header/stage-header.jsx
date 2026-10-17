@@ -193,7 +193,7 @@ const StageHeaderComponent = function (props) {
             );
         header = (
             <Box
-                className={styles.stageHeaderWrapper}
+                className={classNames(styles.stageHeaderWrapper, 'multiwarp-mobile-stage-header')}
                 // + 2 px because the stage will have 2 pixels of border around it
                 style={{minWidth: `${Math.max(stageDimensions.width, getMinWidth(stageSize)) + 2}px`}}
             >

@@ -1,0 +1,135 @@
+:global(body.mobile-preview) {
+    min-width: 1024px;
+    min-height: 100%;
+    height: 100%;
+    overflow: auto;
+    touch-action: pan-x pan-y;
+    -webkit-text-size-adjust: 100%;
+}
+
+:global(body.mobile-preview #app),
+:global(body.mobile-preview .multiwarp-app) {
+    position: relative;
+    width: 100%;
+    min-width: 1024px;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 640px;
+}
+
+:global(body.mobile-preview .multiwarp-gui) {
+    min-width: 1024px;
+    min-height: 640px;
+    height: 100%;
+}
+
+:global(body.mobile-preview .multiwarp-gui button),
+:global(body.mobile-preview .multiwarp-gui [role="button"]) {
+    min-width: 48px;
+    min-height: 48px;
+    touch-action: manipulation;
+}
+
+:global(body.mobile-preview .multiwarp-mobile-stage-header) {
+    padding: 0.5rem 0.75rem;
+}
+
+:global(body.mobile-preview .multiwarp-mobile-stage-header .stage-size-row > *),
+:global(body.mobile-preview .multiwarp-mobile-stage-header .stage-button),
+:global(body.mobile-preview .multiwarp-mobile-stage-header button),
+:global(body.mobile-preview .multiwarp-mobile-stage-header [role="button"]) {
+    min-width: 56px;
+    min-height: 56px;
+}
+
+:global(body.mobile-preview .multiwarp-mobile-menu) {
+    min-width: 1024px;
+}
+
+:global(body.mobile-preview .multiwarp-mobile-menu [class*="menu-bar-item"]) {
+    min-height: 48px;
+}
+
+:global(body.mobile-preview .multiwarp-editor-pane [role="tablist"]) {
+    min-height: 64px;
+}
+
+:global(body.mobile-preview .multiwarp-editor-pane [role="tab"]) {
+    min-height: 56px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.95rem;
+    touch-action: manipulation;
+}
+
+:global(body.mobile-preview .multiwarp-editor-pane [role="tab"]),
+:global(body.mobile-preview .multiwarp-editor-pane [role="menuitem"]),
+:global(body.mobile-preview .multiwarp-editor-pane [class*="library-item"]) {
+    min-height: 56px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+}
+
+:global(body.mobile-preview .multiwarp-editor-pane [role="tab"] img) {
+    width: 1.6rem;
+}
+
+:global(body.mobile-preview .multiwarp-gui .blocklyToolboxDiv .blocklyTreeRow),
+:global(body.mobile-preview .multiwarp-gui .blocklyToolboxDiv .scratchCategoryMenuItem) {
+    min-height: 48px;
+}
+
+:global(body.mobile-preview .multiwarp-gui .scratchCategoryMenuItemLabel) {
+    font-size: 0.9rem;
+}
+
+:global(body.mobile-preview .multiwarp-gui .blocklyZoom > *) {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+:global(body.mobile-preview .multiwarp-editor-pane [class*="selector_list-item"]) {
+    width: 76px;
+    height: 76px;
+}
+
+:global(body.mobile-preview .multiwarp-editor-pane [class*="selector_new-buttons"] > button) {
+    min-height: 48px;
+}
+
+:global(body.mobile-preview .multiwarp-editor-pane [class*="sound-editor_button_"]) {
+    min-height: 44px;
+    font-size: 0.95rem;
+}
+
+:global(body.mobile-preview .multiwarp-editor-pane [class*="sound-editor_round-button_"]) {
+    width: 3.5rem;
+    height: 3.5rem;
+}
+
+:global(body.mobile-preview .multiwarp-editor-pane [class*="sound-editor_effect-button_"]),
+:global(body.mobile-preview .multiwarp-editor-pane [class*="sound-editor_tool-button_"]) {
+    min-height: 48px;
+    font-size: 0.75rem;
+}
+
+:global(body.mobile-preview .multiwarp-editor-pane [class*="paint-editor_button-group-button"]),
+:global(body.mobile-preview .multiwarp-editor-pane [class*="fixed-tools_button-group-button"]),
+:global(body.mobile-preview .multiwarp-editor-pane [class*="tool-select-base_mod-tool-select"]) {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+:global(body.mobile-preview .multiwarp-editor-pane [class*="paint-editor_button-group-button-icon"]),
+:global(body.mobile-preview .multiwarp-editor-pane [class*="fixed-tools_button-group-button-icon"]) {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+:global(body.mobile-preview .multiwarp-editor-pane [class*="tool-select-base_tool-select-icon"]) {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+:global(body.mobile-preview .multiwarp-editor-pane [class*="tool-select-base_mod-tool-select"]) {
+    padding: 0.35rem;
+}

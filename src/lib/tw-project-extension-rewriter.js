@@ -1,9 +1,14 @@
 import JSZip from '@turbowarp/jszip';
 
-const getBundledExtensionsBaseURL = () => new URL(
-    `${process.env.ROOT || ''}static/extensions/`,
-    window.location.origin
-).href;
+const getBundledExtensionsBaseURL = () => {
+    if (window.__MULTIWARP_OFFLINE__) {
+        return 'offline-bundle://static/extensions/';
+    }
+    return new URL(
+        `${process.env.ROOT || ''}static/extensions/`,
+        window.location.origin
+    ).href;
+};
 
 const knownExtensions = {
     dtbyxeroname: {
@@ -24,6 +29,21 @@ const knownExtensions = {
     }
 };
 
+const getOfflineExtensionURL = url => {
+    const offlineBundle = window.__MULTIWARP_OFFLINE__;
+    if (!offlineBundle) return null;
+    try {
+        const parsedURL = new URL(url, window.location.href);
+        const marker = '/static/extensions/';
+        const markerIndex = parsedURL.pathname.lastIndexOf(marker);
+        if (markerIndex === -1) return null;
+        const extensionPath = decodeURIComponent(parsedURL.pathname.slice(markerIndex + marker.length));
+        return offlineBundle.extensionURLsByPath[extensionPath] || null;
+    } catch (e) {
+        return null;
+    }
+};
+
 const rewriteProjectJSON = project => {
     if (
         !project ||
@@ -37,16 +57,22 @@ const rewriteProjectJSON = project => {
 
     let rewrittenURLs = null;
     let bundledExtensionsBaseURL = null;
-    for (const [extensionId, extension] of Object.entries(knownExtensions)) {
-        if (
-            project.extensions.includes(extensionId) &&
-            project.extensionURLs[extensionId] === extension.url
-        ) {
-            if (!rewrittenURLs) {
-                rewrittenURLs = {...project.extensionURLs};
-                bundledExtensionsBaseURL = getBundledExtensionsBaseURL();
+    for (const extensionId of project.extensions) {
+        const extension = knownExtensions[extensionId];
+        let extensionURL = null;
+        if (extension && project.extensionURLs[extensionId] === extension.url) {
+            if (window.__MULTIWARP_OFFLINE__) {
+                extensionURL = window.__MULTIWARP_OFFLINE__.extensionURLsByPath[extension.path];
+            } else {
+                bundledExtensionsBaseURL = bundledExtensionsBaseURL || getBundledExtensionsBaseURL();
+                extensionURL = `${bundledExtensionsBaseURL}${extension.path}`;
             }
-            rewrittenURLs[extensionId] = `${bundledExtensionsBaseURL}${extension.path}`;
+        } else {
+            extensionURL = getOfflineExtensionURL(project.extensionURLs[extensionId]);
+        }
+        if (extensionURL && extensionURL !== project.extensionURLs[extensionId]) {
+            if (!rewrittenURLs) rewrittenURLs = {...project.extensionURLs};
+            rewrittenURLs[extensionId] = extensionURL;
         }
     }
 

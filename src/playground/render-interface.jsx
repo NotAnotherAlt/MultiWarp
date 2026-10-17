@@ -47,6 +47,7 @@ import InvalidEmbed from '../components/tw-invalid-embed/invalid-embed.jsx';
 import {APP_NAME} from '../lib/brand.js';
 
 import styles from './interface.css';
+import './mobile-preview.css';
 
 const isInvalidEmbed = window.parent !== window;
 
@@ -286,7 +287,7 @@ class Interface extends React.Component {
         const isEditor = !isPlayerOnly;
         return (
             <div
-                className={classNames(styles.container, {
+                className={classNames(styles.container, 'multiwarp-app', {
                     [styles.playerOnly]: isHomepage,
                     [styles.editor]: isEditor,
                     [styles.pageTransitioning]: this.state.pageTransitioning

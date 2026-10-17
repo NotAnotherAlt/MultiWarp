@@ -40,25 +40,37 @@ const translateGalleryItem = (extension, locale) => ({
 });
 
 let cachedGallery = null;
-const localExtensionsBaseURL = new URL(
+const offlineBundle = window.__MULTIWARP_OFFLINE__;
+const localExtensionsBaseURL = offlineBundle ? null : new URL(
     `${process.env.ROOT}static/extensions/`,
     window.location.origin
 ).href;
 
 const fetchLibrary = async () => {
-    const res = await fetch(`${localExtensionsBaseURL}generated-metadata/extensions-v0.json`);
-    if (!res.ok) {
-        throw new Error(`HTTP status ${res.status}`);
+    let data;
+    if (offlineBundle) {
+        data = offlineBundle.extensionMetadata;
+    } else {
+        const res = await fetch(`${localExtensionsBaseURL}generated-metadata/extensions-v0.json`);
+        if (!res.ok) {
+            throw new Error(`HTTP status ${res.status}`);
+        }
+        data = await res.json();
     }
-    const data = await res.json();
     return data.extensions.map(extension => ({
         name: extension.name,
         nameTranslations: extension.nameTranslations || {},
         description: extension.description,
         descriptionTranslations: extension.descriptionTranslations || {},
         extensionId: extension.id,
-        extensionURL: `${localExtensionsBaseURL}${extension.slug}.js`,
-        ...(extension.image ? {iconURL: `${localExtensionsBaseURL}${extension.image}`} : {}),
+        extensionURL: offlineBundle ?
+            offlineBundle.extensionURLsByPath[`${extension.slug}.js`] :
+            `${localExtensionsBaseURL}${extension.slug}.js`,
+        ...(extension.image ? {
+            iconURL: offlineBundle ?
+                offlineBundle.assetURLs[`static/extensions/${extension.image}`] :
+                `${localExtensionsBaseURL}${extension.image}`
+        } : {}),
         tags: ['tw'],
         credits: [
             ...(extension.original || []),

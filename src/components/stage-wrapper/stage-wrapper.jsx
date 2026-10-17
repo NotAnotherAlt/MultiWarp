@@ -26,6 +26,7 @@ const StageWrapperComponent = function (props) {
         <Box
             className={classNames(
                 styles.stageWrapper,
+                'multiwarp-mobile-stage',
                 {
                     [styles.embedded]: isEmbedded,
                     [styles.fullScreen]: isFullScreen,

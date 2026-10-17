@@ -22,11 +22,35 @@ test project in the editor to check changes before deploying. Stop the server wi
 Ctrl+C when you're done. In GitHub Codespaces or another remote environment, open
 port `8601` from the forwarded ports panel if localhost is not accessible directly.
 
+Open `http://localhost:8601/mobile.html` to preview the touch-friendly mobile
+editor in a phone-sized browser window. It keeps the regular side-by-side editor
+and stage layout, with larger code blocks and touch targets. Pan horizontally to
+reach the full editor when the screen is narrower than the desktop layout.
+
 Use **See project** and **See inside** to switch between the running project and
 editor without reloading the currently open document. The view transition is
 animated, and the Blockly workspace is removed while the project-only view is
 shown; the project continues running in the VM. The development build still
 provides separate `index.html` and `editor.html` entry points for direct links.
+
+## Standalone Offline HTML
+
+Build a single-file copy of the editor that can be opened directly from disk:
+
+```sh
+npm run package:offline
+```
+
+The generated file is `build/MultiWarp-Offline.html`. It embeds the editor,
+extension gallery, add-ons, and required runtime assets in one compressed HTML
+file, so it does not need a web server or an internet connection to open and edit
+projects. The file is large; allow the browser a little time to start it, especially
+on low-memory devices. Use a current browser with `DecompressionStream` support.
+
+Extensions or project features that contact online services, use connected
+hardware, or depend on browser permissions still need those services, devices, or
+permissions. The package makes the editor and bundled files available offline; it
+cannot make network-dependent services work without a connection.
 
 ## Local Extensions
 

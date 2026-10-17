@@ -1637,6 +1637,48 @@
       "description": "Use WebXR VR sessions and controllers with the 3D extension.",
       "image": "images/upstream/PenguinMod-jg_3d/camera.png",
       "scratchCompatible": false
+    },
+    {
+      "id": "browserControl",
+      "slug": "upstream/iixsharp/BrowserControl",
+      "name": "Browser Control",
+      "description": "Read browser dimensions, open HTTP(S) links, or navigate the current tab to an HTTP(S) URL. Projects can open websites or leave the editor, so use this extension only with projects you trust.",
+      "image": "images/BrowserControl.svg",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "iiSharp",
+          "link": "https://github.com/iixsharp/Turbowarp-Extensions"
+        }
+      ]
+    },
+    {
+      "id": "vectormath",
+      "slug": "upstream/ABW-Gossamer/VectorMath",
+      "name": "Vector Math",
+      "description": "Create and store 2D and 3D vectors, then add, subtract, scale, normalize, rotate, and measure them.",
+      "image": "images/VectorMath.svg",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "ABW",
+          "link": "https://github.com/ABW-Gossamer/ABW-Extensions"
+        }
+      ]
+    },
+    {
+      "id": "nishiowoOde",
+      "slug": "upstream/NishiOwO/ODE",
+      "name": "3D Physics (ODE)",
+      "description": "Create 3D physics worlds, rigid bodies, collision shapes, joints, and raycasts. Requires unsandboxed extension support.",
+      "image": "images/ODE-Physics.svg",
+      "scratchCompatible": false,
+      "by": [
+        {
+          "name": "NishiOwO",
+          "link": "https://github.com/NishiOwO/tw-ode"
+        }
+      ]
     }
   ]
 }

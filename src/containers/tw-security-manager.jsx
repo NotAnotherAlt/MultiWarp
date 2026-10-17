@@ -13,13 +13,28 @@ import {getPersistedUnsandboxed, setPersistedUnsandboxed} from '../lib/tw-persis
  * Set of extension URLs that the user has manually trusted to load unsandboxed.
  */
 const extensionsTrustedByUser = new Set();
-const bundledExtensionsBaseURL = new URL(
+const offlineBundle = window.__MULTIWARP_OFFLINE__;
+const bundledExtensionsBaseURL = offlineBundle ? null : new URL(
     `${process.env.ROOT}static/extensions/`,
     window.location.origin
-).href;
+);
 
 const manuallyTrustExtension = url => {
     extensionsTrustedByUser.add(url);
+};
+
+const isBundledExtension = url => {
+    if (!bundledExtensionsBaseURL) return false;
+    let parsedURL;
+    try {
+        parsedURL = new URL(url);
+    } catch (e) {
+        return false;
+    }
+    return parsedURL.origin === bundledExtensionsBaseURL.origin && (
+        parsedURL.pathname.startsWith(bundledExtensionsBaseURL.pathname) ||
+        parsedURL.pathname.startsWith('/static/extensions/')
+    );
 };
 
 /**
@@ -28,8 +43,9 @@ const manuallyTrustExtension = url => {
  * @returns {boolean} True if the extension can is trusted
  */
 const isTrustedExtension = url => (
+    (offlineBundle && offlineBundle.trustedExtensionURLs.has(url)) ||
     // Always trust extensions bundled with this build.
-    url.startsWith(bundledExtensionsBaseURL) ||
+    isBundledExtension(url) ||
 
     // For development.
     url.startsWith('http://localhost:8000/') ||

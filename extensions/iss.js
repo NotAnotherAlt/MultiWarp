@@ -73,6 +73,7 @@ class ISSLocationExtension {
     }
 
     async getISSCoordinate(args) {
+        if (window.__MULTIWARP_OFFLINE__) return 'ISS data is unavailable offline';
         const coordinate = args.LATORLONG;
         try {
             const response = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
@@ -87,6 +88,10 @@ class ISSLocationExtension {
         }
     }
     whenISSPassesOverLocation(args, util) {
+        if (window.__MULTIWARP_OFFLINE__) {
+            console.warn('Live ISS location is unavailable in the offline build.');
+            return;
+        }
         const location = args.LOCATION.toLowerCase();
         setInterval(async () => {
             try {
@@ -111,6 +116,7 @@ class ISSLocationExtension {
     }
 
     async getDistanceToISS(args) {
+        if (window.__MULTIWARP_OFFLINE__) return 'ISS data is unavailable offline';
         const { LATITUDE, LONGITUDE } = args;
         try {
             const response = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
@@ -127,6 +133,7 @@ class ISSLocationExtension {
     }
 
     async getISSVelocity() {
+        if (window.__MULTIWARP_OFFLINE__) return 'ISS data is unavailable offline';
         try {
             const response = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
             if (!response.ok) {

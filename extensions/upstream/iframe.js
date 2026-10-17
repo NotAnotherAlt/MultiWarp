@@ -371,6 +371,10 @@
 
     async display({ URL }) {
       closeFrame();
+      if (window.__MULTIWARP_OFFLINE__ && /^https?:/i.test(Scratch.Cast.toString(URL).trim())) {
+        console.warn('External websites are unavailable in the offline build.');
+        return;
+      }
       if (await Scratch.canEmbed(URL)) {
         createFrame(Scratch.Cast.toString(URL));
       }

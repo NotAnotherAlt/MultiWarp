@@ -191,6 +191,15 @@ module.exports = [
                 ...htmlWebpackPluginCommon
             }),
             new HtmlWebpackPlugin({
+                chunks: ['editor'],
+                template: 'src/playground/index.ejs',
+                filename: 'mobile.html',
+                title: `${APP_NAME} - Mobile Preview`,
+                isEditor: true,
+                bodyClass: 'mobile-preview',
+                ...htmlWebpackPluginCommon
+            }),
+            new HtmlWebpackPlugin({
                 chunks: ['player'],
                 template: 'src/playground/index.ejs',
                 filename: 'index.html',

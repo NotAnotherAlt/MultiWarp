@@ -443,7 +443,9 @@
 
   let activeEngine = null;
   const pendingEngineValues = {};
-  const engineReady = import(THREE_MODULE_URL).then(THREE => {
+  const offlineThreeURL = window.__MULTIWARP_OFFLINE__ &&
+    window.__MULTIWARP_OFFLINE__.assetURLs['static/extensions/vendor/three.module.js'];
+  const engineReady = import(offlineThreeURL || THREE_MODULE_URL).then(THREE => {
     activeEngine = new Jg3DEngine(THREE);
     Object.assign(activeEngine, pendingEngineValues);
     runtime.ext_jg3d = activeEngine;
