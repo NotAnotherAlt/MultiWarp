@@ -5,11 +5,7 @@ import VM from 'scratch-vm';
 import {defineMessages, injectIntl, intlShape} from 'react-intl';
 import log from '../lib/log';
 
-import extensionLibraryContent, {
-    galleryError,
-    galleryLoading,
-    galleryMore
-} from '../lib/libraries/extensions/index.jsx';
+import extensionLibraryContent from '../lib/libraries/extensions/index.jsx';
 import extensionTags from '../lib/libraries/tw-extension-tags';
 
 import LibraryComponent from '../components/library/library.jsx';
@@ -178,9 +174,8 @@ class ExtensionLibrary extends React.PureComponent {
         let library = null;
         if (this.state.gallery || this.state.galleryError || this.state.galleryTimedOut) {
             library = extensionLibraryContent.map(toLibraryItem);
-            library.push('---');
             if (this.state.gallery) {
-                library.push(toLibraryItem(galleryMore));
+                library.push('---');
                 const locale = this.props.intl.locale;
                 library.push(
                     ...this.state.gallery
@@ -188,10 +183,6 @@ class ExtensionLibrary extends React.PureComponent {
                         .map(i => translateGalleryItem(i, locale))
                         .map(toLibraryItem)
                 );
-            } else if (this.state.galleryError) {
-                library.push(toLibraryItem(galleryError));
-            } else {
-                library.push(toLibraryItem(galleryLoading));
             }
         }
 

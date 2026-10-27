@@ -4,12 +4,14 @@ import {defineMessages, injectIntl, intlShape} from 'react-intl';
 import bindAll from 'lodash.bindall';
 import {connect} from 'react-redux';
 import {closeSettingsModal} from '../reducers/modals';
+import {setRendererVSyncState} from '../reducers/tw';
 import SettingsModalComponent from '../components/tw-settings-modal/settings-modal.jsx';
 import {defaultStageSize} from '../reducers/custom-stage-size';
+import setVMFramerate from '../lib/set-vm-framerate';
 
 const messages = defineMessages({
     newFramerate: {
-        defaultMessage: 'New framerate:',
+        defaultMessage: 'New framerate (up to 300):',
         description: 'Prompt shown to choose a new framerate',
         id: 'tw.menuBar.newFramerate'
     }
@@ -22,6 +24,7 @@ class UsernameModal extends React.Component {
             'handleFramerateChange',
             'handleCustomizeFramerate',
             'handleHighQualityPenChange',
+            'handleRendererVSyncChange',
             'handleInterpolationChange',
             'handleInfiniteClonesChange',
             'handleRemoveFencingChange',
@@ -34,7 +37,8 @@ class UsernameModal extends React.Component {
             'handleClose'
         ]);
         this.state = {
-            closing: false
+            closing: false,
+            requestedFramerate: props.framerate
         };
         this.closeTimeout = null;
     }
@@ -47,7 +51,9 @@ class UsernameModal extends React.Component {
         this.closeTimeout = setTimeout(this.props.onClose, 250);
     }
     handleFramerateChange (e) {
-        this.props.vm.setFramerate(e.target.checked ? 60 : 30);
+        const framerate = e.target.checked ? 60 : 30;
+        this.setState({requestedFramerate: framerate});
+        setVMFramerate(this.props.vm, framerate);
     }
     async handleCustomizeFramerate () {
         // prompt() returns Promise in desktop app
@@ -55,11 +61,16 @@ class UsernameModal extends React.Component {
         const newFramerate = await prompt(this.props.intl.formatMessage(messages.newFramerate), this.props.framerate);
         const parsed = parseFloat(newFramerate);
         if (isFinite(parsed)) {
-            this.props.vm.setFramerate(parsed);
+            const framerate = Math.min(parsed, 300);
+            this.setState({requestedFramerate: framerate});
+            setVMFramerate(this.props.vm, framerate);
         }
     }
     handleHighQualityPenChange (e) {
         this.props.vm.renderer.setUseHighQualityRender(e.target.checked);
+    }
+    handleRendererVSyncChange (e) {
+        this.props.onRendererVSyncChange(e.target.checked);
     }
     handleInterpolationChange (e) {
         this.props.vm.setInterpolation(e.target.checked);
@@ -112,7 +123,9 @@ class UsernameModal extends React.Component {
                 onClose={this.handleClose}
                 onFramerateChange={this.handleFramerateChange}
                 onCustomizeFramerate={this.handleCustomizeFramerate}
+                requestedFramerate={this.state.requestedFramerate}
                 onHighQualityPenChange={this.handleHighQualityPenChange}
+                onRendererVSyncChange={this.handleRendererVSyncChange}
                 onInterpolationChange={this.handleInterpolationChange}
                 onInfiniteClonesChange={this.handleInfiniteClonesChange}
                 onRemoveFencingChange={this.handleRemoveFencingChange}
@@ -151,6 +164,8 @@ UsernameModal.propTypes = {
     isEmbedded: PropTypes.bool,
     framerate: PropTypes.number,
     highQualityPen: PropTypes.bool,
+    rendererVSync: PropTypes.bool,
+    onRendererVSyncChange: PropTypes.func,
     interpolation: PropTypes.bool,
     infiniteClones: PropTypes.bool,
     removeFencing: PropTypes.bool,
@@ -168,6 +183,7 @@ const mapStateToProps = state => ({
     isEmbedded: state.scratchGui.mode.isEmbedded,
     framerate: state.scratchGui.tw.framerate,
     highQualityPen: state.scratchGui.tw.highQualityPen,
+    rendererVSync: state.scratchGui.tw.rendererVSync,
     interpolation: state.scratchGui.tw.interpolation,
     infiniteClones: state.scratchGui.tw.runtimeOptions.maxClones === Infinity,
     removeFencing: !state.scratchGui.tw.runtimeOptions.fencing,
@@ -178,7 +194,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    onClose: () => dispatch(closeSettingsModal())
+    onClose: () => dispatch(closeSettingsModal()),
+    onRendererVSyncChange: rendererVSync => dispatch(setRendererVSyncState(rendererVSync))
 });
 
 export default injectIntl(connect(

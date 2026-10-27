@@ -221,11 +221,12 @@ const bootstrap = `
     const extensionURLsByPath = Object.create(null);
     const trustedExtensionURLs = new Set();
     const virtualExtensionURL = extensionPath =>
-      'file:///multiwarp-offline/static/extensions/' + extensionPath.split('/').map(encodeURIComponent).join('/');
+      'https://multiwarp-offline.invalid/static/extensions/' + extensionPath.split('/').map(encodeURIComponent).join('/');
+    const getExtensionURL = extensionPath => virtualExtensionURL(extensionPath);
     for (const assetPath of paths) {
       if (assetPath.startsWith('static/extensions/') && assetPath.endsWith('.js')) {
         const extensionPath = assetPath.slice('static/extensions/'.length);
-        const extensionURL = virtualExtensionURL(extensionPath);
+        const extensionURL = getExtensionURL(extensionPath);
         extensionURLsByPath[extensionPath] = extensionURL;
         trustedExtensionURLs.add(extensionURL);
       }
@@ -233,7 +234,7 @@ const bootstrap = `
     for (const extension of extensionMetadata.extensions) {
       const extensionPath = extension.slug + '.js';
       if (assetURLs['static/extensions/' + extensionPath]) {
-        extensionURLsByPath[extensionPath] = virtualExtensionURL(extensionPath);
+        extensionURLsByPath[extensionPath] = getExtensionURL(extensionPath);
       }
     }
     window.__MULTIWARP_OFFLINE__ = {
@@ -272,6 +273,13 @@ const bootstrap = `
       const resolved = resolveScriptOrAssetURL(String(value));
       return isExternalNetworkURL(resolved) ? null : resolved;
     };
+    const isAllowedExternalNavigation = value => {
+      try {
+        return new URL(value).href === 'https://scratch.mit.edu/studios/51827619/comments';
+      } catch (error) {
+        return false;
+      }
+    };
     const warnBlockedExternalResource = value => {
       console.warn('External resource blocked by offline MultiWarp:', value);
     };
@@ -300,7 +308,7 @@ const bootstrap = `
     document.addEventListener('click', event => {
       if (!(event.target instanceof Element)) return;
       const link = event.target.closest('a[href]');
-      if (link && !resolveOfflineResourceURL(link.href)) {
+      if (link && !resolveOfflineResourceURL(link.href) && !isAllowedExternalNavigation(link.href)) {
         event.preventDefault();
         event.stopImmediatePropagation();
         warnBlockedExternalResource(link.href);

@@ -845,6 +845,11 @@
         };
       },
       createPenPlusTextureInfo: function (url, name) {
+        if (typeof url !== "string" || !url.trim()) {
+          console.warn("Pen+ cannot load an image because its URL is missing.");
+          return null;
+        }
+
         const texture = parentExtension.penPlusCostumeLibrary[name]
           ? parentExtension.penPlusCostumeLibrary[name].texture
           : gl.createTexture();
@@ -3105,7 +3110,6 @@
         },
         name: Scratch.translate("Pen+ V7"),
         id: "penP",
-        docsURI:
         docsURI: window.__MULTIWARP_OFFLINE__ ? null :
           "https://pen-group.github.io/docs/?page=extensions%2FpenPlus%2Fmain",
         menuIconURI:

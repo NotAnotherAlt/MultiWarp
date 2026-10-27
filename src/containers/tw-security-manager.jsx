@@ -31,6 +31,10 @@ const isBundledExtension = url => {
     } catch (e) {
         return false;
     }
+    if (offlineBundle && parsedURL.protocol === 'https:' &&
+        parsedURL.hostname === 'multiwarp-offline.invalid') {
+        return parsedURL.pathname.startsWith('/static/extensions/');
+    }
     return parsedURL.origin === bundledExtensionsBaseURL.origin && (
         parsedURL.pathname.startsWith(bundledExtensionsBaseURL.pathname) ||
         parsedURL.pathname.startsWith('/static/extensions/')
@@ -151,6 +155,7 @@ let allowedGeolocation = false;
 
 const SECURITY_MANAGER_METHODS = [
     'getSandboxMode',
+    'rewriteExtensionURL',
     'canLoadExtensionFromProject',
     'canFetch',
     'canOpenWindow',
@@ -261,6 +266,38 @@ class TWSecurityManagerComponent extends React.Component {
         return 'iframe';
     }
 
+    rewriteExtensionURL (url) {
+        if (!offlineBundle) return url;
+        try {
+            const parsedURL = new URL(url, window.location.href);
+            if (parsedURL.protocol === 'https:' && parsedURL.hostname === 'multiwarp-offline.invalid') {
+                const marker = '/static/extensions/';
+                const markerIndex = parsedURL.pathname.lastIndexOf(marker);
+                if (markerIndex !== -1) {
+                    const extensionPath = decodeURIComponent(parsedURL.pathname.slice(markerIndex + marker.length));
+                    const blobURL = offlineBundle.assetURLs[`static/extensions/${extensionPath}`];
+                    if (!blobURL) return url;
+                    return fetch(blobURL)
+                        .then(response => response.text())
+                        .then(source => `data:text/javascript;charset=utf-8,${encodeURIComponent(source)}`);
+                }
+            }
+            const marker = '/static/extensions/';
+            const markerIndex = parsedURL.pathname.lastIndexOf(marker);
+            if (markerIndex !== -1) {
+                const extensionPath = decodeURIComponent(parsedURL.pathname.slice(markerIndex + marker.length));
+                const blobURL = offlineBundle.assetURLs[`static/extensions/${extensionPath}`];
+                if (!blobURL) return url;
+                return fetch(blobURL)
+                    .then(response => response.text())
+                    .then(source => `data:text/javascript;charset=utf-8,${encodeURIComponent(source)}`);
+            }
+        } catch (e) {
+            return url;
+        }
+        return url;
+    }
+
     handleChangeUnsandboxed (e) {
         const checked = e.target.checked;
         this.setState(oldState => ({
@@ -282,16 +319,23 @@ class TWSecurityManagerComponent extends React.Component {
         }
         const {showModal} = await this.acquireModalLock();
         if (url.startsWith('data:')) {
+            log.info(
+                `Project is requesting custom data extension; sandbox choice will be shown for ${url.slice(0, 80)}`
+            );
             const allowed = await showModal(SecurityModals.LoadExtension, {
                 url,
                 unsandboxed: getPersistedUnsandboxed(),
                 onChangeUnsandboxed: this.handleChangeUnsandboxed.bind(this)
             });
             if (allowed) {
+                const sandboxMode = this.state.data.unsandboxed ? 'unsandboxed' : 'sandboxed';
+                log.info(`Custom data extension approved (${sandboxMode})`);
                 setPersistedUnsandboxed(this.state.data.unsandboxed);
-            }
-            if (allowed && this.state.data.unsandboxed) {
-                manuallyTrustExtension(url);
+                if (this.state.data.unsandboxed) {
+                    manuallyTrustExtension(url);
+                }
+            } else {
+                log.info('Custom data extension denied');
             }
             return allowed;
         }

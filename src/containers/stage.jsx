@@ -9,6 +9,7 @@ import {STAGE_DISPLAY_SIZES} from '../lib/layout-constants';
 import {getEventXY} from '../lib/touch-utils';
 import VideoProvider from '../lib/video/video-provider';
 import {BitmapAdapter as V2BitmapAdapter} from '@turbowarp/scratch-svg-renderer';
+import createRendererDrawScheduler from '../lib/renderer-draw-scheduler';
 
 import StageComponent from '../components/stage/stage.jsx';
 
@@ -85,6 +86,7 @@ class Stage extends React.Component {
             this.props.vm.renderer.on('UseHighQualityRenderChanged', this.props.onHighQualityPenChanged);
         }
         this.props.vm.attachV2BitmapAdapter(new V2BitmapAdapter());
+        this.rendererDrawScheduler = createRendererDrawScheduler(this.renderer, this.props.rendererVSync);
     }
     componentDidMount () {
         this.attachRectEvents();
@@ -103,7 +105,8 @@ class Stage extends React.Component {
             this.state.question !== nextState.question ||
             this.props.micIndicator !== nextProps.micIndicator ||
             this.props.isStarted !== nextProps.isStarted ||
-            this.props.customStageSize !== nextProps.customStageSize;
+            this.props.customStageSize !== nextProps.customStageSize ||
+            this.props.rendererVSync !== nextProps.rendererVSync;
     }
     componentDidUpdate (prevProps) {
         if (this.props.isColorPicking && !prevProps.isColorPicking) {
@@ -113,12 +116,14 @@ class Stage extends React.Component {
         }
         this.updateRect();
         this.renderer.resize(this.rect.width, this.rect.height);
+        this.rendererDrawScheduler.setEnabled(this.props.rendererVSync);
     }
     componentWillUnmount () {
         this.detachMouseEvents(this.canvas);
         this.detachRectEvents();
         this.stopColorPickingLoop();
         this.props.vm.runtime.removeListener('QUESTION', this.questionListener);
+        this.rendererDrawScheduler.dispose();
     }
     questionListener (question) {
         this.setState({question: question});
@@ -466,6 +471,7 @@ class Stage extends React.Component {
 Stage.propTypes = {
     onHighQualityPenChanged: PropTypes.func,
     highQualityPen: PropTypes.bool,
+    rendererVSync: PropTypes.bool,
     customStageSize: PropTypes.shape({
         width: PropTypes.number,
         height: PropTypes.number
@@ -492,6 +498,7 @@ Stage.defaultProps = {
 
 const mapStateToProps = state => ({
     highQualityPen: state.scratchGui.tw.highQualityPen,
+    rendererVSync: state.scratchGui.tw.rendererVSync,
     customStageSize: state.scratchGui.customStageSize,
     disableEditingTargetChange: (
         state.scratchGui.mode.isFullScreen ||

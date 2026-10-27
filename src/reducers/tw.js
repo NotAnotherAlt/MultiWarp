@@ -5,6 +5,7 @@ const SET_RUNTIME_OPTIONS = 'tw/SET_RUNTIME_OPTIONS';
 const SET_USERNAME = 'tw/SET_USERNAME';
 const SET_CLOUD = 'tw/SET_CLOUD';
 const SET_HIGH_QUALITY_PEN = 'tw/SET_HIGH_QUALITY_PEN';
+const SET_RENDERER_VSYNC = 'tw/SET_RENDERER_VSYNC';
 const SET_WINDOW_FULLSCREEN = 'tw/SET_WINDOW_FULLSCREEN';
 const SET_DIMENSIONS = 'tw/SET_DIMENSIONS';
 const SET_AUTHOR = 'tw/SET_AUTHOR';
@@ -24,6 +25,7 @@ export const initialState = {
     cloud: true,
     username: '',
     highQualityPen: false,
+    rendererVSync: true,
     compilerOptions: {
         enabled: true,
         warpTimer: false
@@ -85,6 +87,10 @@ const reducer = function (state, action) {
     case SET_HIGH_QUALITY_PEN:
         return Object.assign({}, state, {
             highQualityPen: action.highQualityPen
+        });
+    case SET_RENDERER_VSYNC:
+        return Object.assign({}, state, {
+            rendererVSync: action.rendererVSync
         });
     case SET_WINDOW_FULLSCREEN:
         return Object.assign({}, state, {
@@ -194,6 +200,13 @@ const setHighQualityPenState = function (highQualityPen) {
     };
 };
 
+const setRendererVSyncState = function (rendererVSync) {
+    return {
+        type: SET_RENDERER_VSYNC,
+        rendererVSync
+    };
+};
+
 const setIsWindowFullScreen = function (isWindowFullScreen) {
     return {
         type: SET_WINDOW_FULLSCREEN,
@@ -288,6 +301,7 @@ export {
     setUsername,
     setCloud,
     setHighQualityPenState,
+    setRendererVSyncState,
     setIsWindowFullScreen,
     setDimensions,
     setAuthor,

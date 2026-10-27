@@ -150,44 +150,83 @@ const HighQualityPen = props => (
     />
 );
 
-const CustomFPS = props => (
+const VSync = props => (
     <BooleanSetting
-        value={props.framerate !== 30}
-        onChange={props.onChange}
+        {...props}
         label={
             <FormattedMessage
-                defaultMessage="60 FPS (Custom FPS)"
-                description="FPS setting"
-                id="tw.settingsModal.fps"
+                defaultMessage="V-sync"
+                description="V-sync setting"
+                id="tw.settingsModal.vSync"
             />
         }
         help={
             <FormattedMessage
                 // eslint-disable-next-line max-len
-                defaultMessage="Runs scripts 60 times per second instead of 30. Most projects will not work properly with this enabled. You should try Interpolation with 60 FPS mode disabled if that is the case. {customFramerate}."
-                description="FPS setting help"
-                id="tw.settingsModal.fpsHelp"
-                values={{
-                    customFramerate: (
-                        <a
-                            onClick={props.onCustomizeFramerate}
-                            tabIndex="0"
-                        >
-                            <FormattedMessage
-                                defaultMessage="Click to use a framerate other than 30 or 60"
-                                description="FPS settings help"
-                                id="tw.settingsModal.fpsHelp.customFramerate"
-                            />
-                        </a>
-                    )
-                }}
+                defaultMessage="Limits renderer draws to at most once per display refresh. Actual WebGL presentation synchronization is controlled by your browser and graphics hardware."
+                description="V-sync setting help"
+                id="tw.settingsModal.vSyncHelp"
             />
         }
-        slug="custom-fps"
     />
 );
+
+const CustomFPS = props => {
+    const {
+        requestedFramerate,
+        ...settingProps
+    } = props;
+    return (
+        <BooleanSetting
+            {...settingProps}
+            value={props.framerate !== 30}
+            onChange={props.onChange}
+            label={
+                <FormattedMessage
+                    defaultMessage="60 FPS (Custom FPS)"
+                    description="FPS setting"
+                    id="tw.settingsModal.fps"
+                />
+            }
+            secondary={requestedFramerate > 250 && (
+                <div className={styles.warning}>
+                    <FormattedMessage
+                        // eslint-disable-next-line max-len
+                        defaultMessage="Framerates above 250 FPS may be limited by browser timer precision. The maximum requested framerate is 300 FPS."
+                        description="Warning that browser timer precision may limit high requested framerates"
+                        id="tw.settingsModal.highFramerateWarning"
+                    />
+                </div>
+            )}
+            help={
+                <FormattedMessage
+                    // eslint-disable-next-line max-len
+                    defaultMessage="Runs scripts 60 times per second instead of 30. Most projects will not work properly with this enabled. You should try Interpolation with 60 FPS mode disabled if that is the case. Custom framerates can be set up to 300 FPS. {customFramerate}."
+                    description="FPS setting help"
+                    id="tw.settingsModal.fpsHelp"
+                    values={{
+                        customFramerate: (
+                            <a
+                                onClick={props.onCustomizeFramerate}
+                                tabIndex="0"
+                            >
+                                <FormattedMessage
+                                    defaultMessage="Click to use a framerate other than 30 or 60"
+                                    description="FPS settings help"
+                                    id="tw.settingsModal.fpsHelp.customFramerate"
+                                />
+                            </a>
+                        )
+                    }}
+                />
+            }
+            slug="custom-fps"
+        />
+    );
+};
 CustomFPS.propTypes = {
     framerate: PropTypes.number,
+    requestedFramerate: PropTypes.number,
     onChange: PropTypes.func,
     onCustomizeFramerate: PropTypes.func
 };
@@ -454,6 +493,7 @@ const SettingsModalComponent = props => (
             </Header>
             <CustomFPS
                 framerate={props.framerate}
+                requestedFramerate={props.requestedFramerate}
                 onChange={props.onFramerateChange}
                 onCustomizeFramerate={props.onCustomizeFramerate}
             />
@@ -464,6 +504,10 @@ const SettingsModalComponent = props => (
             <HighQualityPen
                 value={props.highQualityPen}
                 onChange={props.onHighQualityPenChange}
+            />
+            <VSync
+                value={props.rendererVSync}
+                onChange={props.onRendererVSyncChange}
             />
             <WarpTimer
                 value={props.warpTimer}
@@ -519,10 +563,13 @@ SettingsModalComponent.propTypes = {
     isClosing: PropTypes.bool,
     isEmbedded: PropTypes.bool,
     framerate: PropTypes.number,
+    requestedFramerate: PropTypes.number,
     onFramerateChange: PropTypes.func,
     onCustomizeFramerate: PropTypes.func,
     highQualityPen: PropTypes.bool,
+    rendererVSync: PropTypes.bool,
     onHighQualityPenChange: PropTypes.func,
+    onRendererVSyncChange: PropTypes.func,
     interpolation: PropTypes.bool,
     onInterpolationChange: PropTypes.func,
     infiniteClones: PropTypes.bool,

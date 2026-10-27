@@ -52,8 +52,6 @@ import gdxforConnectionSmallIconURL from './gdxfor/gdxfor-small.svg';
 import twIcon from './tw/tw.svg';
 import customExtensionIcon from './custom/custom.svg';
 import returnIcon from './custom/return.svg';
-import galleryIcon from './gallery/gallery.svg';
-import {APP_NAME} from '../../brand';
 
 const offlineBundle = window.__MULTIWARP_OFFLINE__;
 const localExtensionsBaseURL = offlineBundle ?
@@ -65,9 +63,6 @@ const localExtensionsBaseURL = offlineBundle ?
 const faceSensingExtensionURL = offlineBundle ?
     offlineBundle.extensionURLsByPath['upstream/lab/face-sensing.js'] :
     `${localExtensionsBaseURL}lab/face-sensing.js`;
-const galleryMetadataURL = offlineBundle ?
-    offlineBundle.assetURLs['static/extensions/generated-metadata/extensions-v0.json'] :
-    `${process.env.ROOT}static/extensions/generated-metadata/extensions-v0.json`;
 
 export default [
     {
@@ -398,14 +393,7 @@ export default [
     },
     {
         name: (
-            <FormattedMessage
-                defaultMessage="{APP_NAME} Blocks"
-                description="Name of the strange 'TurboWarp Blocks' extension"
-                id="tw.twExtension.name"
-                values={{
-                    APP_NAME
-                }}
-            />
+            'TurboWarp Blocks'
         ),
         extensionId: 'tw',
         iconURL: twIcon,
@@ -442,81 +430,3 @@ export default [
         // Not marked as incompatible with Scratch so that clicking on it doesn't show a prompt
     }
 ];
-
-export const galleryLoading = {
-    name: (
-        <FormattedMessage
-            defaultMessage="{APP_NAME} Extension Gallery"
-            description="Name of the bundled extension gallery in extension library"
-            id="tw.extensionGallery.name"
-            values={{
-                APP_NAME
-            }}
-        />
-    ),
-    href: galleryMetadataURL,
-    extensionId: 'gallery',
-    iconURL: galleryIcon,
-    description: (
-        <FormattedMessage
-            // eslint-disable-next-line max-len
-            defaultMessage="Loading extension gallery..."
-            description="Appears while loading extension list from the custom extension gallery"
-            id="tw.extensionGallery.loading"
-        />
-    ),
-    tags: ['tw'],
-    featured: true
-};
-
-export const galleryMore = {
-    name: (
-        <FormattedMessage
-            defaultMessage="{APP_NAME} Extension Gallery"
-            description="Name of the bundled extension gallery in extension library"
-            id="tw.extensionGallery.name"
-            values={{
-                APP_NAME
-            }}
-        />
-    ),
-    href: galleryMetadataURL,
-    extensionId: 'gallery',
-    iconURL: galleryIcon,
-    description: (
-        <FormattedMessage
-            // eslint-disable-next-line max-len
-            defaultMessage="View the extensions bundled with this build."
-            description="Appears after the extension list from the gallery was loaded successfully"
-            id="tw.extensionGallery.more"
-        />
-    ),
-    tags: ['tw'],
-    featured: true
-};
-
-export const galleryError = {
-    name: (
-        <FormattedMessage
-            defaultMessage="{APP_NAME} Extension Gallery"
-            description="Name of the bundled extension gallery in extension library"
-            id="tw.extensionGallery.name"
-            values={{
-                APP_NAME
-            }}
-        />
-    ),
-    href: galleryMetadataURL,
-    extensionId: 'gallery',
-    iconURL: galleryIcon,
-    description: (
-        <FormattedMessage
-            // eslint-disable-next-line max-len
-            defaultMessage="Error loading the bundled extension gallery."
-            description="Appears when an error occurred loading extension list from the custom extension gallery"
-            id="tw.extensionGallery.error"
-        />
-    ),
-    tags: ['tw'],
-    featured: true
-};
